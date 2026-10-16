@@ -1,42 +1,51 @@
 package com.example.appcolegio
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.appcolegio.data.local.LocalDatabaseHelper
 import com.example.appcolegio.ui.AppScreen
 import com.example.appcolegio.ui.MainViewModel
-import com.example.appcolegio.ui.screens.ProfileSelectionScreen
-import com.example.appcolegio.ui.screens.student.DidacticContentScreen
-import com.example.appcolegio.ui.screens.student.QuizResultScreen
-import com.example.appcolegio.ui.screens.student.QuizScreen
 import com.example.appcolegio.ui.screens.student.StudentHomeScreen
-import com.example.appcolegio.ui.screens.student.UnitDetailScreen
-import com.example.appcolegio.ui.screens.teacher.ContentAssignmentScreen
-import com.example.appcolegio.ui.screens.teacher.PedagogicalReportScreen
 import com.example.appcolegio.ui.screens.teacher.TeacherHomeScreen
 import com.example.appcolegio.ui.screens.utp.UtpReviewScreen
 import com.example.appcolegio.ui.theme.AppColegioTheme
+import androidx.compose.foundation.layout.safeDrawingPadding
 
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        val dbHelper = LocalDatabaseHelper(this)
+        dbHelper.insertInitialUsers()
+
         setContent {
             AppColegioTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .safeDrawingPadding(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MpazProApp()
+                    AppNavigation(viewModel = viewModel)
                 }
             }
         }
@@ -44,93 +53,118 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MpazProApp(viewModel: MainViewModel = viewModel()) {
-    val uiState by viewModel.uiState.collectAsState()
-    val repo = viewModel.getRepository()
+fun AppNavigation(viewModel: MainViewModel) {
+    val navController = rememberNavController()
 
-    when (uiState.currentScreen) {
-        AppScreen.PROFILE_SELECTION -> {
-            ProfileSelectionScreen(
-                profiles = repo.defaultProfiles,
-                onProfileSelected = { user ->
-                    viewModel.selectUserAndNavigate(user)
-                }
-            )
+    // Usamos el enum LOGIN como punto de partida
+    NavHost(navController = navController, startDestination = AppScreen.LOGIN.name) {
+
+        composable(AppScreen.LOGIN.name) {
+            LoginScreen(navController = navController, viewModel = viewModel)
         }
 
-        AppScreen.STUDENT_HOME -> {
+        composable(AppScreen.STUDENT_HOME.name) {
+            val studentProfile = viewModel.defaultProfiles().find { it.role == "Estudiante" } ?: viewModel.defaultProfiles().first()
+            val subjects = viewModel.getSubjects()
+
             StudentHomeScreen(
-                user = uiState.selectedUser ?: repo.defaultProfiles.first(),
-                subjects = repo.defaultSubjects,
-                onNavigate = { screen -> viewModel.navigateTo(screen) }
+                user = studentProfile,
+                subjects = subjects,
+                onNavigate = { screen: AppScreen -> navController.navigate(screen.name) }
             )
         }
 
-        AppScreen.UNIT_DETAIL -> {
-            UnitDetailScreen(
-                onNavigate = { screen -> viewModel.navigateTo(screen) }
-            )
-        }
+        composable(AppScreen.TEACHER_HOME.name) {
+            val teacherProfile = viewModel.defaultProfiles().find { it.role == "Docente" } ?: viewModel.defaultProfiles().first()
 
-        AppScreen.DIDACTIC_CONTENT -> {
-            DidacticContentScreen(
-                onNavigate = { screen -> viewModel.navigateTo(screen) }
-            )
-        }
-
-        AppScreen.QUIZ_ACTIVITY -> {
-            val currentQ = uiState.questions.getOrNull(uiState.currentQuestionIndex)
-                ?: repo.getInitialQuestions().first()
-
-            QuizScreen(
-                question = currentQ,
-                currentQuestionIndex = uiState.currentQuestionIndex,
-                totalQuestions = uiState.totalQuestions,
-                onNavigate = { screen -> viewModel.navigateTo(screen) }
-            )
-        }
-
-        AppScreen.QUIZ_RESULT -> {
-            QuizResultScreen(
-                score = uiState.quizScore,
-                total = uiState.totalQuestions,
-                attemptsLeft = uiState.attemptsLeft,
-                onRetry = { viewModel.retryQuiz() },
-                onNavigate = { screen -> viewModel.navigateTo(screen) }
-            )
-        }
-
-        AppScreen.TEACHER_HOME -> {
             TeacherHomeScreen(
-                user = uiState.selectedUser ?: repo.defaultProfiles[1],
-                onNavigate = { screen -> viewModel.navigateTo(screen) }
+                user = teacherProfile,
+                onNavigate = { screen: AppScreen -> navController.navigate(screen.name) }
             )
         }
 
-        AppScreen.CONTENT_ASSIGNMENT -> {
-            ContentAssignmentScreen(
-                currentConfig = uiState.assignmentConfig,
-                onSaveConfig = { newConfig -> viewModel.updateAssignmentConfig(newConfig) },
-                onNavigate = { screen -> viewModel.navigateTo(screen) }
-            )
-        }
+        composable(AppScreen.UTP_HOME.name) {
+            val utpStatus = viewModel.getUtpStatus()
 
-        AppScreen.PEDAGOGICAL_REPORT -> {
-            PedagogicalReportScreen(
-                utpStatus = uiState.utpStatus,
-                objectives = repo.defaultObjectives,
-                onNavigate = { screen -> viewModel.navigateTo(screen) }
-            )
-        }
-
-        AppScreen.UTP_REVIEW -> {
             UtpReviewScreen(
-                utpStatus = uiState.utpStatus,
-                criteriaList = repo.getUtpCriteria(),
-                onAuthorize = { viewModel.updateUtpStatus("AUTORIZADO") },
-                onRequestChanges = { viewModel.updateUtpStatus("CAMBIOS_SOLICITADOS") },
-                onNavigate = { screen -> viewModel.navigateTo(screen) }
+                utpStatus = utpStatus.status,
+                criteriaList = utpStatus.criteria,
+                onAuthorize = { /* Lógica pendiente */ },
+                onRequestChanges = { /* Lógica pendiente */ },
+                onNavigate = { screen: AppScreen -> navController.navigate(screen.name) }
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginScreen(navController: NavController, viewModel: MainViewModel) {
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Escuela Escritora Marcela Paz",
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = "Apoyo Didáctico",
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Usuario") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Contraseña") },
+            singleLine = true,
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = {
+                val role = viewModel.login(username, password)
+
+                if (role != null) {
+                    Toast.makeText(context, "Ingresando como $role", Toast.LENGTH_SHORT).show()
+
+                    when (role) {
+                        "STUDENT" -> navController.navigate(AppScreen.STUDENT_HOME.name)
+                        "TEACHER" -> navController.navigate(AppScreen.TEACHER_HOME.name)
+                        "UTP" -> navController.navigate(AppScreen.UTP_HOME.name)
+                    }
+                } else {
+                    Toast.makeText(context, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Ingresar")
         }
     }
 }
