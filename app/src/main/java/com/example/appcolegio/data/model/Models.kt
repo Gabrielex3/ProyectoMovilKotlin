@@ -17,20 +17,57 @@ data class SubjectItem(
     val colorHex: Long
 )
 
+data class ContentItem(
+    val id: String,
+    val title: String,
+    val bodyText: String,
+    val durationMin: Int = 5
+)
+
+data class InteractiveItem(
+    val id: String,
+    val title: String,
+    val description: String,
+    val type: String = "diagram" // "diagram", "audio", "simulation"
+)
+
+data class QuizItem(
+    val id: String,
+    val title: String,
+    val questions: List<QuizQuestion>
+)
+
+data class UnitItem(
+    val id: String,
+    val subjectId: String,
+    val subjectName: String,
+    val unitNumber: Int,
+    val unitTitle: String,
+    val description: String,
+    val progressPercent: Int,
+    val isAuthorizedByUtp: Boolean = true, // Por defecto las preexistentes están autorizadas
+    val learningObjectives: MutableList<LearningObjective> = mutableListOf(),
+    val contents: MutableList<ContentItem> = mutableListOf(),
+    val interactiveContents: MutableList<InteractiveItem> = mutableListOf(),
+    val quizzes: MutableList<QuizItem> = mutableListOf()
+)
+
 data class LearningObjective(
     val code: String,
     val description: String,
-    val achievedPercent: Int,
-    val logradoCount: Int,
-    val enProcesoCount: Int,
-    val sinEvidenciaCount: Int
+    val achievedPercent: Int = 70,
+    val logradoCount: Int = 20,
+    val enProcesoCount: Int = 10,
+    val sinEvidenciaCount: Int = 4
 )
 
 data class QuizQuestion(
     val id: Int,
+    val subjectId: String = "SUBJ_1",
+    val subjectName: String = "Ciencias Naturales",
     val title: String,
     val contextText: String,
-    val imageType: String = "lamp", // "lamp", "sun", "toaster", "heater", "battery"
+    val imageType: String = "lamp",
     val options: List<String>,
     val correctIndex: Int,
     val userSelectedIndex: Int? = null

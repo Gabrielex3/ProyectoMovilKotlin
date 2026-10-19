@@ -1,0 +1,21 @@
+package com.example.appcolegio.ui
+
+enum class AppScreen {
+    LOGIN,
+    PROFILE_SELECTION,
+    STUDENT_HOME,
+    SUBJECTS_LIST,
+    UNIT_DETAIL,
+    DIDACTIC_CONTENT,
+    QUIZ,
+    STUDENT_ACTIVITIES,
+    QUIZ_ACTIVITY,
+    QUIZ_SESSION,
+    QUIZ_RESULT,
+    TEACHER_HOME,
+    CONTENT_ASSIGNMENT,
+    CREATE_QUIZ,
+    PEDAGOGICAL_REPORT,
+    UTP_HOME,
+    UTP_REVIEW
+}

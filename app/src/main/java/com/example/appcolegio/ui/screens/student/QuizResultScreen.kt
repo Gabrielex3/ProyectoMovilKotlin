@@ -26,6 +26,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -39,44 +40,55 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.appcolegio.data.model.QuizQuestion
 import com.example.appcolegio.ui.AppScreen
 
 @Composable
 fun QuizResultScreen(
     score: Int,
     total: Int,
+    questions: List<QuizQuestion>,
     attemptsLeft: Int,
     onRetry: () -> Unit,
     onNavigate: (AppScreen) -> Unit
 ) {
+    val incorrectCount = maxOf(0, total - score)
+    val percentage = if (total > 0) (score * 100) / total else 0
+
     Scaffold(
         topBar = {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(horizontal = 8.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
-                IconButton(onClick = { onNavigate(AppScreen.UNIT_DETAIL) }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Resultado de la actividad", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                    Text("Ciencias • OA 9", fontSize = 12.sp, color = Color(0xFF64748B))
-                }
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFFDBEAFE),
-                    modifier = Modifier.padding(end = 8.dp)
+                Spacer(modifier = Modifier.height(28.dp)) // Safe camera punch-hole padding
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Estudiante",
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                        color = Color(0xFF1E40AF),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    IconButton(onClick = { onNavigate(AppScreen.STUDENT_ACTIVITIES) }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Resultado de la actividad", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                        Text("Evaluación • Desglose", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFDBEAFE),
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Text(
+                            text = "Estudiante",
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            color = Color(0xFF1E40AF),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
         }
@@ -84,7 +96,7 @@ fun QuizResultScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8FAFC))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
@@ -122,7 +134,7 @@ fun QuizResultScreen(
                 color = Color(0xFFFEF3C7)
             ) {
                 Text(
-                    text = "🎯 ${score * 20}% de logro",
+                    text = "🎯 $percentage% de logro",
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                     color = Color(0xFFB45309),
                     fontSize = 12.sp,
@@ -133,19 +145,19 @@ fun QuizResultScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "¡Buen trabajo, Antonia!",
+                text = "¡Buen trabajo!",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E293B),
+                color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Revisa dos respuestas y vuelve a intentarlo cuando te sientas lista.",
+                text = if (incorrectCount == 0) "¡Excelente! Has respondido todas las preguntas correctamente." else "Revisa las respuestas detalladas a continuación.",
                 fontSize = 13.sp,
-                color = Color(0xFF64748B),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
@@ -165,7 +177,7 @@ fun QuizResultScreen(
                     Text("🔄 ", fontSize = 14.sp)
                     Column {
                         Text(
-                            text = "Te quedan $attemptsLeft intentos",
+                            text = if (attemptsLeft > 0) "Te quedan $attemptsLeft intentos" else "Has agotado tus intentos",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF1D4ED8)
@@ -187,52 +199,55 @@ fun QuizResultScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Tus respuestas", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                Text("🟢 $score correctas  🔴 ${total - score} por revisar", fontSize = 11.sp, color = Color(0xFF64748B))
+                Text("Tus respuestas", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text("🟢 $score correctas  🔴 $incorrectCount incorrectas", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            ResultAnswerItem(1, "Transformación en una lámpara", "Eléctrica ➔ luz y calor", isCorrect = true)
-            Spacer(modifier = Modifier.height(8.dp))
+            // Dynamic questions breakdown matching score
+            questions.forEachIndexed { index, q ->
+                val userSelection = q.userSelectedIndex ?: 0
+                val isCorrect = userSelection == q.correctIndex
+                val correctOptionText = q.options.getOrNull(q.correctIndex) ?: "Respuesta correcta"
 
-            ResultAnswerItem(2, "Fuente renovable", "Energía solar", isCorrect = true)
-            Spacer(modifier = Modifier.height(8.dp))
-
-            ResultAnswerItem(3, "Energía en una tostadora", "Térmica ➔ eléctrica", isCorrect = false)
-            Spacer(modifier = Modifier.height(8.dp))
-
-            ResultAnswerItem(4, "Transferencia de calor", "Por contacto", isCorrect = true)
-            Spacer(modifier = Modifier.height(8.dp))
-
-            ResultAnswerItem(5, "Energía almacenada", "Energía sonora", isCorrect = false)
+                ResultAnswerItem(
+                    number = index + 1,
+                    title = q.title,
+                    subtitle = correctOptionText,
+                    isCorrect = isCorrect
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // Bottom Buttons: Revisar & Reintentar
+            // Bottom Buttons: Volver a Actividades / Reintentar (si quedan intentos)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 OutlinedButton(
-                    onClick = { onNavigate(AppScreen.DIDACTIC_CONTENT) },
+                    onClick = { onNavigate(AppScreen.STUDENT_ACTIVITIES) },
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
                     shape = RoundedCornerShape(24.dp)
                 ) {
-                    Text("Revisar", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                    Text("Menú Actividades", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 }
 
-                Button(
-                    onClick = { onRetry() },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
-                ) {
-                    Text("Reintentar", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                if (attemptsLeft > 0) {
+                    Button(
+                        onClick = { onRetry() },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(24.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text("Reintentar ($attemptsLeft)", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    }
                 }
             }
         }
@@ -252,7 +267,7 @@ fun ResultAnswerItem(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -271,8 +286,8 @@ fun ResultAnswerItem(
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(title, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                Text(subtitle, fontSize = 11.sp, color = Color(0xFF64748B))
+                Text(title, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text(subtitle, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             Box(

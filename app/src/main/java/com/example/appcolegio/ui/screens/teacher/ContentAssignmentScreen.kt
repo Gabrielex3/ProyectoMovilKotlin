@@ -28,7 +28,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -65,7 +65,7 @@ fun ContentAssignmentScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
                     .padding(horizontal = 8.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -73,8 +73,8 @@ fun ContentAssignmentScreen(
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                 }
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Nueva asignación", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                    Text("Docente • Curso 6.° A", fontSize = 12.sp, color = Color(0xFF64748B))
+                    Text("Nueva asignación", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Docente • Curso 6.° A", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -82,7 +82,7 @@ fun ContentAssignmentScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8FAFC))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
@@ -130,17 +130,17 @@ fun ContentAssignmentScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text("Configura la actividad", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+            Text("Configura la actividad", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // Field 1: Course
-            Text("Curso destinatario", fontSize = 12.sp, color = Color(0xFF64748B))
+            Text("Curso destinatario", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.height(4.dp))
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Row(
                     modifier = Modifier
@@ -149,20 +149,20 @@ fun ContentAssignmentScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("👥 6.° A • 34 estudiantes", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                    Text("▼", fontSize = 12.sp, color = Color(0xFF64748B))
+                    Text("👥 6.° A • 34 estudiantes", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text("▼", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // Field 2: Due Date
-            Text("Fecha de entrega", fontSize = 12.sp, color = Color(0xFF64748B))
+            Text("Fecha de entrega", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.height(4.dp))
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Row(
                     modifier = Modifier
@@ -171,8 +171,8 @@ fun ContentAssignmentScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("📅 Viernes 9 de octubre - 18:00", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                    Text("▼", fontSize = 12.sp, color = Color(0xFF64748B))
+                    Text("📅 Viernes 9 de octubre - 18:00", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text("▼", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -184,14 +184,14 @@ fun ContentAssignmentScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Límite de intentos", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                Text("Límite de intentos", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFE2E8F0))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                             .clickable { if (maxAttempts > 1) maxAttempts-- },
                         contentAlignment = Alignment.Center
                     ) {
@@ -200,7 +200,7 @@ fun ContentAssignmentScreen(
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    Text("$maxAttempts", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                    Text(maxAttempts.toString(), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
 
                     Spacer(modifier = Modifier.width(12.dp))
 
@@ -238,8 +238,8 @@ fun ContentAssignmentScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Mostrar corrección al finalizar", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                    Text("Indica respuestas correctas e incorrectas", fontSize = 11.sp, color = Color(0xFF64748B))
+                    Text("Mostrar corrección al finalizar", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Indica respuestas correctas e incorrectas", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Switch(
                     checked = showCorrection,
@@ -257,8 +257,8 @@ fun ContentAssignmentScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Publicar ahora", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                    Text("Disponible inmediatamente para el curso", fontSize = 11.sp, color = Color(0xFF64748B))
+                    Text("Publicar ahora", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Disponible inmediatamente para el curso", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Switch(
                     checked = isPublished,
@@ -288,6 +288,19 @@ fun ContentAssignmentScreen(
             Spacer(modifier = Modifier.height(28.dp))
 
             Button(
+                onClick = { onNavigate(AppScreen.CREATE_QUIZ) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(24.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D9488))
+            ) {
+                Text("➕ Crear Nuevo Quiz / Pregunta", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
                 onClick = {
                     onSaveConfig(
                         AssignmentConfig(
@@ -302,7 +315,7 @@ fun ContentAssignmentScreen(
                     .fillMaxWidth()
                     .height(52.dp),
                 shape = RoundedCornerShape(26.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text("Revisar asignación", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
@@ -315,12 +328,12 @@ fun StepIndicator(step: String, label: String, isDone: Boolean, isActive: Boolea
     val circleBg = when {
         isDone -> Color(0xFFDCFCE7)
         isActive -> Color(0xFF2563EB)
-        else -> Color(0xFFE2E8F0)
+        else -> MaterialTheme.colorScheme.surfaceVariant
     }
     val circleTextColor = when {
         isDone -> Color(0xFF15803D)
         isActive -> Color.White
-        else -> Color(0xFF64748B)
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -334,20 +347,20 @@ fun StepIndicator(step: String, label: String, isDone: Boolean, isActive: Boolea
             Text(if (isDone) "✓" else step, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = circleTextColor)
         }
         Spacer(modifier = Modifier.width(6.dp))
-        Text(label, fontSize = 11.sp, fontWeight = if (isActive || isDone) FontWeight.Bold else FontWeight.Normal, color = if (isActive) Color(0xFF1E293B) else Color(0xFF64748B))
+        Text(label, fontSize = 11.sp, fontWeight = if (isActive || isDone) FontWeight.Bold else FontWeight.Normal, color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
 fun AttemptOptionChip(label: String, isSelected: Boolean, onClick: () -> Unit) {
-    val bg = if (isSelected) Color(0xFFDBEAFE) else Color.White
-    val textCol = if (isSelected) Color(0xFF1D4ED8) else Color(0xFF475569)
+    val bg = if (isSelected) Color(0xFFDBEAFE) else MaterialTheme.colorScheme.surface
+    val textCol = if (isSelected) Color(0xFF1D4ED8) else MaterialTheme.colorScheme.onSurface
 
     Surface(
         modifier = Modifier.clickable { onClick() },
         shape = RoundedCornerShape(8.dp),
         color = bg,
-        border = if (isSelected) BorderStroke(1.dp, Color(0xFF2563EB)) else androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0))
+        border = BorderStroke(1.dp, if (isSelected) Color(0xFF2563EB) else Color(0xFFCBD5E1))
     ) {
         Text(label, modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp), fontSize = 10.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal, color = textCol)
     }

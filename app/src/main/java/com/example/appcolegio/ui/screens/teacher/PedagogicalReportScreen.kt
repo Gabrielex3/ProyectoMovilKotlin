@@ -2,9 +2,7 @@ package com.example.appcolegio.ui.screens.teacher
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +24,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -49,12 +47,15 @@ fun PedagogicalReportScreen(
     objectives: List<LearningObjective>,
     onNavigate: (AppScreen) -> Unit
 ) {
+    val isAutorizado = utpStatus == "AUTORIZADO"
+    val isCambiosSolicitados = utpStatus == "CAMBIOS_SOLICITADOS"
+
     Scaffold(
         topBar = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
                     .padding(horizontal = 8.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -62,8 +63,8 @@ fun PedagogicalReportScreen(
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                 }
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Informe pedagógico", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                    Text("Ciencias • 6.° A", fontSize = 12.sp, color = Color(0xFF64748B))
+                    Text("Informe pedagógico", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Ciencias • 6.° A", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Surface(
                     shape = RoundedCornerShape(12.dp),
@@ -81,7 +82,7 @@ fun PedagogicalReportScreen(
             }
         },
         bottomBar = {
-            NavigationBar(containerColor = Color.White) {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                 NavigationBarItem(
                     selected = false,
                     onClick = { onNavigate(AppScreen.TEACHER_HOME) },
@@ -106,18 +107,42 @@ fun PedagogicalReportScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8FAFC))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Status Banner
+            // Dynamic Status Banner reflecting UTP decision!
+            val bannerBg = when {
+                isAutorizado -> Color(0xFFDCFCE7)
+                isCambiosSolicitados -> Color(0xFFFEE2E2)
+                else -> Color(0xFFFEF3C7)
+            }
+            val titleText = when {
+                isAutorizado -> "✅ Informe autorizado por UTP"
+                isCambiosSolicitados -> "⚠️ Cambios solicitados por UTP"
+                else -> "⏳ Pendiente de validación UTP"
+            }
+            val subtitleText = when {
+                isAutorizado -> "Aprobado para visualización institucional."
+                isCambiosSolicitados -> "Revisa los comentarios de la Jefatura UTP y reenvía."
+                else -> "Borrador docente. No está visible para estudiantes."
+            }
+            val badgeText = when {
+                isAutorizado -> "VALIDADO"
+                isCambiosSolicitados -> "CAMBIOS"
+                else -> "BORRADOR"
+            }
+            val badgeColor = when {
+                isAutorizado -> Color(0xFF15803D)
+                isCambiosSolicitados -> Color(0xFFB91C1C)
+                else -> Color(0xFFB45309)
+            }
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (utpStatus == "AUTORIZADO") Color(0xFFDCFCE7) else Color(0xFFFEF3C7)
-                )
+                colors = CardDefaults.cardColors(containerColor = bannerBg)
             ) {
                 Row(
                     modifier = Modifier.padding(14.dp),
@@ -125,26 +150,26 @@ fun PedagogicalReportScreen(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = if (utpStatus == "AUTORIZADO") "✅ Informe autorizado por UTP" else "⏳ Pendiente de validación UTP",
+                            text = titleText,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (utpStatus == "AUTORIZADO") Color(0xFF15803D) else Color(0xFFB45309)
+                            color = badgeColor
                         )
                         Text(
-                            text = if (utpStatus == "AUTORIZADO") "Aprobado para visualización institucional." else "Borrador docente. No está visible para estudiantes.",
+                            text = subtitleText,
                             fontSize = 11.sp,
-                            color = if (utpStatus == "AUTORIZADO") Color(0xFF166534) else Color(0xFF92400E)
+                            color = badgeColor
                         )
                     }
 
                     Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = if (utpStatus == "AUTORIZADO") Color(0xFFBBF7D0) else Color(0xFFFDE68A)
+                        color = Color.White.copy(alpha = 0.8f)
                     ) {
                         Text(
-                            text = if (utpStatus == "AUTORIZADO") "VALIDADO" else "BORRADOR",
+                            text = badgeText,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            color = if (utpStatus == "AUTORIZADO") Color(0xFF15803D) else Color(0xFFB45309),
+                            color = badgeColor,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -158,18 +183,18 @@ fun PedagogicalReportScreen(
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = Color.White,
-                    border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                    color = MaterialTheme.colorScheme.surface,
+                    border = BorderStroke(1.dp, Color(0xFFCBD5E1))
                 ) {
-                    Text("👥 6.° A  ▼", modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), fontSize = 12.sp, color = Color(0xFF1E293B), fontWeight = FontWeight.Bold)
+                    Text("👥 6.° A  ▼", modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
                 }
 
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = Color.White,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0))
+                    color = MaterialTheme.colorScheme.surface,
+                    border = BorderStroke(1.dp, Color(0xFFCBD5E1))
                 ) {
-                    Text("📖 Unidad 2  ▼", modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), fontSize = 12.sp, color = Color(0xFF1E293B), fontWeight = FontWeight.Bold)
+                    Text("📖 Unidad 2  ▼", modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -181,8 +206,8 @@ fun PedagogicalReportScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Síntesis del curso", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                Text("34 estudiantes", fontSize = 11.sp, color = Color(0xFF64748B))
+                Text("Síntesis del curso", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text("34 estudiantes", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -204,7 +229,7 @@ fun PedagogicalReportScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Resultados por objetivo", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                Text("Resultados por objetivo", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Text("Ordenar por logro", fontSize = 11.sp, color = Color(0xFF2563EB), fontWeight = FontWeight.Bold)
             }
 
@@ -221,14 +246,14 @@ fun PedagogicalReportScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("ℹ️ ", fontSize = 14.sp)
                     Text(
                         text = "Resumen basado en actividades del MVP. Requiere criterio docente y validación UTP; no constituye diagnóstico automático.",
                         fontSize = 11.sp,
-                        color = Color(0xFF64748B),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 15.sp
                     )
                 }
@@ -259,7 +284,7 @@ fun OaResultCard(oa: LearningObjective) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -276,7 +301,7 @@ fun OaResultCard(oa: LearningObjective) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(oa.description, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+            Text(oa.description, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -298,7 +323,7 @@ fun OaResultCard(oa: LearningObjective) {
             ) {
                 Text("🟢 ${oa.logradoCount} logrado", fontSize = 11.sp, color = Color(0xFF15803D))
                 Text("🟡 ${oa.enProcesoCount} en proceso", fontSize = 11.sp, color = Color(0xFFB45309))
-                Text("⚪ ${oa.sinEvidenciaCount} sin evidencia", fontSize = 11.sp, color = Color(0xFF64748B))
+                Text("⚪ ${oa.sinEvidenciaCount} sin evidencia", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

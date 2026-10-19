@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,6 +29,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,7 +43,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.appcolegio.data.model.QuizQuestion
@@ -51,19 +50,24 @@ import com.example.appcolegio.ui.AppScreen
 
 @Composable
 fun QuizScreen(
-    question: QuizQuestion,
-    currentQuestionIndex: Int,
-    totalQuestions: Int,
+    questions: List<QuizQuestion>,
+    onFinishQuiz: (score: Int, total: Int, answeredList: List<QuizQuestion>) -> Unit,
     onNavigate: (AppScreen) -> Unit
 ) {
-    var selectedIndex by remember { mutableIntStateOf(question.userSelectedIndex ?: 1) }
+    var currentIndex by remember { mutableIntStateOf(0) }
+    val mutableQuestions = remember(questions) { questions.toMutableList() }
+    val currentQuestion = mutableQuestions.getOrNull(currentIndex) ?: mutableQuestions.first()
+
+    var selectedOptionForCurrent by remember(currentIndex) {
+        mutableIntStateOf(currentQuestion.userSelectedIndex ?: 0)
+    }
 
     Scaffold(
         topBar = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
                 Row(
                     modifier = Modifier
@@ -71,14 +75,14 @@ fun QuizScreen(
                         .padding(horizontal = 8.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { onNavigate(AppScreen.UNIT_DETAIL) }) {
+                    IconButton(onClick = { onNavigate(AppScreen.STUDENT_ACTIVITIES) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Comprueba lo aprendido", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                        Text("Ciencias • OA 9", fontSize = 12.sp, color = Color(0xFF64748B))
+                        Text(currentQuestion.subjectName, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                        Text("Evaluación de la unidad", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    IconButton(onClick = { onNavigate(AppScreen.UNIT_DETAIL) }) {
+                    IconButton(onClick = { onNavigate(AppScreen.STUDENT_ACTIVITIES) }) {
                         Icon(Icons.Default.Close, contentDescription = "Cerrar")
                     }
                 }
@@ -89,12 +93,12 @@ fun QuizScreen(
                         .padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Pregunta ${currentQuestionIndex + 1} de $totalQuestions", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                    Text("1 punto", fontSize = 12.sp, color = Color(0xFF64748B))
+                    Text("Pregunta ${currentIndex + 1} de ${mutableQuestions.size}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text("1 punto", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
 
                 LinearProgressIndicator(
-                    progress = { (currentQuestionIndex + 1) / totalQuestions.toFloat() },
+                    progress = { (currentIndex + 1) / mutableQuestions.size.toFloat() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(4.dp),
@@ -107,34 +111,34 @@ fun QuizScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8FAFC))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
             Text(
-                text = "OBSERVA Y RESPONDE",
+                text = "OBSERVA Y RESPONDE (${currentQuestion.title})",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF64748B)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = question.contextText,
+                text = currentQuestion.contextText,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E293B)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Visual Lamp Illustration Box
+            // Visual Box
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp),
+                    .height(120.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFFEF3C7))
             ) {
@@ -143,14 +147,25 @@ fun QuizScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("💡", fontSize = 48.sp)
+                        Text(
+                            text = when (currentQuestion.imageType) {
+                                "lamp" -> "💡"
+                                "sun" -> "☀️"
+                                "toaster" -> "🍞"
+                                "heater" -> "🔥"
+                                "battery" -> "🔋"
+                                "math" -> "🔢"
+                                else -> "📖"
+                            },
+                            fontSize = 44.sp
+                        )
                         Spacer(modifier = Modifier.height(4.dp))
                         Surface(
                             shape = RoundedCornerShape(10.dp),
                             color = Color(0xFFFDE68A)
                         ) {
                             Text(
-                                text = "encendida",
+                                text = currentQuestion.subjectName,
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
@@ -164,12 +179,12 @@ fun QuizScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // Options List
-            question.options.forEachIndexed { index, optionText ->
-                val isSelected = selectedIndex == index
+            currentQuestion.options.forEachIndexed { index, optionText ->
+                val isSelected = selectedOptionForCurrent == index
                 OptionItem(
                     text = optionText,
                     isSelected = isSelected,
-                    onClick = { selectedIndex = index }
+                    onClick = { selectedOptionForCurrent = index }
                 )
                 Spacer(modifier = Modifier.height(10.dp))
             }
@@ -179,23 +194,43 @@ fun QuizScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("ℹ️ ", fontSize = 12.sp)
                 Text(
-                    text = "Puedes cambiar tu respuesta antes de continuar.",
+                    text = "Puedes cambiar tu respuesta antes de pasar a la siguiente.",
                     fontSize = 12.sp,
-                    color = Color(0xFF64748B)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { onNavigate(AppScreen.QUIZ_RESULT) },
+                onClick = {
+                    val q = mutableQuestions[currentIndex]
+                    mutableQuestions[currentIndex] = q.copy(userSelectedIndex = selectedOptionForCurrent)
+
+                    if (currentIndex + 1 < mutableQuestions.size) {
+                        currentIndex++
+                    } else {
+                        var calculatedScore = 0
+                        mutableQuestions.forEach { item ->
+                            if ((item.userSelectedIndex ?: 0) == item.correctIndex) {
+                                calculatedScore++
+                            }
+                        }
+                        onFinishQuiz(calculatedScore, mutableQuestions.size, mutableQuestions)
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
                 shape = RoundedCornerShape(26.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text("Confirmar y continuar", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(
+                    text = if (currentIndex + 1 < mutableQuestions.size) "Siguiente Pregunta ➔" else "Finalizar y ver Resultado",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
             }
         }
     }
@@ -207,8 +242,8 @@ fun OptionItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val borderColor = if (isSelected) Color(0xFF2563EB) else Color(0xFFE2E8F0)
-    val cardBg = if (isSelected) Color(0xFFEFF6FF) else Color.White
+    val borderColor = if (isSelected) Color(0xFF2563EB) else Color(0xFFCBD5E1)
+    val cardBg = if (isSelected) Color(0xFFEFF6FF) else MaterialTheme.colorScheme.surface
 
     Card(
         modifier = Modifier
@@ -229,7 +264,7 @@ fun OptionItem(
                 modifier = Modifier.weight(1f),
                 fontSize = 13.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                color = if (isSelected) Color(0xFF1E40AF) else Color(0xFF1E293B)
+                color = if (isSelected) Color(0xFF1E40AF) else MaterialTheme.colorScheme.onSurface
             )
 
             Box(

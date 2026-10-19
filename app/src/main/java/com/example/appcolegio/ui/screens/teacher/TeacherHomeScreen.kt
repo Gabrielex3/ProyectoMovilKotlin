@@ -20,12 +20,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.Analytics
-import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -49,7 +49,7 @@ fun TeacherHomeScreen(
 ) {
     Scaffold(
         bottomBar = {
-            NavigationBar(containerColor = Color.White) {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                 NavigationBarItem(
                     selected = true,
                     onClick = { onNavigate(AppScreen.TEACHER_HOME) },
@@ -74,7 +74,7 @@ fun TeacherHomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8FAFC))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
@@ -88,18 +88,18 @@ fun TeacherHomeScreen(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFF1D4ED8))
+                        .background(Color(0xFF0D9488))
                         .clickable { onNavigate(AppScreen.PROFILE_SELECTION) },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("M", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text("C", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 }
 
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Curso 6.° A", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                    Text("Profesora Camila Rojas", fontSize = 12.sp, color = Color(0xFF64748B))
+                    Text("Curso 6.° A", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Profesora ${user.name}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
 
                 Surface(
@@ -130,7 +130,7 @@ fun TeacherHomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Buenos días, Camila", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text("Buenos días, ${user.name.split(" ").first()}", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Tu curso completó 112 actividades esta semana.",
@@ -145,8 +145,8 @@ fun TeacherHomeScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Course Summary Metrics
-            Text("Resumen del curso", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-            Text("Últimos 7 días", fontSize = 11.sp, color = Color(0xFF64748B))
+            Text("Resumen del curso", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            Text("Últimos 7 días", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -167,7 +167,7 @@ fun TeacherHomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Avance por asignatura", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                Text("Avance por asignatura", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Surface(
                     shape = RoundedCornerShape(8.dp),
                     color = Color(0xFFEFF6FF)
@@ -189,21 +189,21 @@ fun TeacherHomeScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Recent Activity
-            Text("Actividad reciente", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+            Text("Actividad reciente", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("📈 ", fontSize = 14.sp)
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Mayor participación en Ciencias", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                            Text("28 de 34 estudiantes completaron OA 9", fontSize = 11.sp, color = Color(0xFF64748B))
+                            Text("Mayor participación en Ciencias", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                            Text("28 de 34 estudiantes completaron OA 9", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         Surface(shape = RoundedCornerShape(8.dp), color = Color(0xFFDCFCE7)) {
                             Text("+12%", modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp), color = Color(0xFF15803D), fontSize = 11.sp, fontWeight = FontWeight.Bold)
@@ -215,10 +215,10 @@ fun TeacherHomeScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("⏳ ", fontSize = 14.sp)
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("6 actividades esperan revisión", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                            Text("Asignadas durante los últimos 3 días", fontSize = 11.sp, color = Color(0xFF64748B))
+                            Text("6 actividades esperan revisión", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                            Text("Asignadas durante los últimos 3 días", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
-                        Text("➔", color = Color(0xFF94A3B8), fontSize = 14.sp)
+                        Text("➔", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
                     }
                 }
             }
@@ -231,15 +231,15 @@ fun MetricCard(title: String, subtitle: String, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+            Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             Spacer(modifier = Modifier.height(2.dp))
-            Text(subtitle, fontSize = 10.sp, color = Color(0xFF64748B))
+            Text(subtitle, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -249,7 +249,7 @@ fun SubjectProgressItem(name: String, progress: Float, percentText: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier
@@ -257,7 +257,7 @@ fun SubjectProgressItem(name: String, progress: Float, percentText: String) {
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(name, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B), modifier = Modifier.width(90.dp))
+            Text(name, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.width(90.dp))
             LinearProgressIndicator(
                 progress = { progress },
                 modifier = Modifier
