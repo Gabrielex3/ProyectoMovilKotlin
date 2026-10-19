@@ -22,7 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,6 +29,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedButton
@@ -55,72 +55,69 @@ fun UtpReviewScreen(
     onRequestChanges: () -> Unit,
     onNavigate: (AppScreen) -> Unit
 ) {
+    val isAutorizado = utpStatus == "AUTORIZADO"
+    val isCambiosSolicitados = utpStatus == "CAMBIOS_SOLICITADOS"
+
     Scaffold(
         topBar = {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(horizontal = 8.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
-                Box(
+                Spacer(modifier = Modifier.height(28.dp)) // Safe camera punch-hole padding
+                Row(
                     modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFF3E8FF))
-                        .clickable { onNavigate(AppScreen.PROFILE_SELECTION) },
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("M", color = Color(0xFF6B21A8), fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                }
+                    IconButton(onClick = { onNavigate(AppScreen.UTP_HOME) }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = when {
+                                isAutorizado -> "Autorizado"
+                                isCambiosSolicitados -> "Cambios solicitados"
+                                else -> "Pendiente de autorización"
+                            },
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text("Enviado por Camila Rojas • hoy, 10:24", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
 
-                Spacer(modifier = Modifier.width(10.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = if (utpStatus == "AUTORIZADO") "Autorizado" else "Pendiente de autorización",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1E293B)
-                    )
-                    Text("Enviado por Camila Rojas • hoy, 10:24", fontSize = 11.sp, color = Color(0xFF64748B))
-                }
-
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFFF3E8FF),
-                    modifier = Modifier.clickable { onNavigate(AppScreen.PROFILE_SELECTION) }
-                ) {
-                    Text(
-                        text = "Jefatura UTP 🔄",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        color = Color(0xFF6B21A8),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFF3E8FF),
+                        modifier = Modifier.clickable { onNavigate(AppScreen.PROFILE_SELECTION) }
+                    ) {
+                        Text(
+                            text = "Jefatura UTP 🔄",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            color = Color(0xFF6B21A8),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
         },
         bottomBar = {
-            NavigationBar(containerColor = Color.White) {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+                NavigationBarItem(
+                    selected = false,
+                    onClick = { onNavigate(AppScreen.UTP_HOME) },
+                    icon = { Icon(Icons.Default.Verified, contentDescription = "Solicitudes") },
+                    label = { Text("Solicitudes") }
+                )
                 NavigationBarItem(
                     selected = true,
                     onClick = { onNavigate(AppScreen.UTP_REVIEW) },
-                    icon = { Icon(Icons.Default.Verified, contentDescription = "Revisión") },
+                    icon = { Icon(Icons.Default.History, contentDescription = "Revisión") },
                     label = { Text("Revisión") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { onNavigate(AppScreen.UNIT_DETAIL) },
-                    icon = { Icon(Icons.Default.MenuBook, contentDescription = "Contenidos") },
-                    label = { Text("Contenidos") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { onNavigate(AppScreen.TEACHER_HOME) },
-                    icon = { Icon(Icons.Default.History, contentDescription = "Historial") },
-                    label = { Text("Historial") }
                 )
             }
         }
@@ -128,7 +125,7 @@ fun UtpReviewScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8FAFC))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
@@ -190,11 +187,11 @@ fun UtpReviewScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Criterios de revisión", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                Text("Criterios de revisión", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Text(
-                    text = if (utpStatus == "AUTORIZADO") "4 de 4 conformes" else "3 de 4 conformes",
+                    text = if (isAutorizado) "4 de 4 conformes" else "3 de 4 conformes",
                     fontSize = 12.sp,
-                    color = Color(0xFF64748B)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -204,15 +201,15 @@ fun UtpReviewScreen(
                 CriterionCard(
                     title = criterion.title,
                     subtitle = criterion.subtitle,
-                    status = if (utpStatus == "AUTORIZADO") "Conforme" else criterion.status
+                    status = if (isAutorizado) "Conforme" else criterion.status
                 )
                 Spacer(modifier = Modifier.height(10.dp))
             }
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // Action Buttons
-            if (utpStatus != "AUTORIZADO") {
+            // Action Buttons for UTP Decision
+            if (!isAutorizado && !isCambiosSolicitados) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -224,7 +221,7 @@ fun UtpReviewScreen(
                             .height(48.dp),
                         shape = RoundedCornerShape(24.dp)
                     ) {
-                        Text("Pedir cambios", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                        Text("Pedir cambios", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     }
 
                     Button(
@@ -233,7 +230,7 @@ fun UtpReviewScreen(
                             .weight(1f)
                             .height(48.dp),
                         shape = RoundedCornerShape(24.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
                         Text("Autorizar", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     }
@@ -242,20 +239,26 @@ fun UtpReviewScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFDCFCE7))
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isAutorizado) Color(0xFFDCFCE7) else Color(0xFFFEE2E2)
+                    )
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Icon(Icons.Default.Check, contentDescription = "Autorizado", tint = Color(0xFF15803D))
+                        Icon(
+                            imageVector = if (isAutorizado) Icons.Default.Check else Icons.Default.Verified,
+                            contentDescription = utpStatus,
+                            tint = if (isAutorizado) Color(0xFF15803D) else Color(0xFFB91C1C)
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Unidad autorizada correctamente para el curso 6.° A",
+                            text = if (isAutorizado) "✅ Unidad autorizada correctamente para el curso 6.° A" else "⚠️ Cambios solicitados enviada al docente",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF15803D)
+                            color = if (isAutorizado) Color(0xFF15803D) else Color(0xFFB91C1C)
                         )
                     }
                 }
@@ -283,15 +286,15 @@ fun CriterionCard(title: String, subtitle: String, status: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(title, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                Text(subtitle, fontSize = 11.sp, color = Color(0xFF64748B))
+                Text(title, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text(subtitle, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             Surface(

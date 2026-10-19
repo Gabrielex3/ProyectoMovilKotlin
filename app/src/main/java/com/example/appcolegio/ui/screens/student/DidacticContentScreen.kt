@@ -2,7 +2,6 @@ package com.example.appcolegio.ui.screens.student
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +28,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -52,7 +52,7 @@ fun DidacticContentScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
                 Row(
                     modifier = Modifier
@@ -64,8 +64,8 @@ fun DidacticContentScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("La energía se transforma", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                        Text("Ciencias • Unidad 2", fontSize = 12.sp, color = Color(0xFF64748B))
+                        Text("La energía se transforma", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                        Text("Ciencias • Unidad 2", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     IconButton(onClick = { }) {
                         Icon(Icons.Default.BookmarkBorder, contentDescription = "Guardar")
@@ -78,7 +78,7 @@ fun DidacticContentScreen(
                         .padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("2 de 3", fontSize = 11.sp, color = Color(0xFF64748B))
+                    Text("2 de 3", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text("66%", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2563EB))
                 }
 
@@ -96,7 +96,7 @@ fun DidacticContentScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8FAFC))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
@@ -120,7 +120,7 @@ fun DidacticContentScreen(
                 text = "La energía no desaparece: cambia de una forma a otra",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E293B)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -128,7 +128,7 @@ fun DidacticContentScreen(
             Text(
                 text = "Cuando la luz del Sol llega a un panel solar, se transforma en energía eléctrica. Esa electricidad puede encender una lámpara y convertirse en luz y calor.",
                 fontSize = 13.sp,
-                color = Color(0xFF475569),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 18.sp
             )
 
@@ -138,7 +138,7 @@ fun DidacticContentScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
@@ -150,9 +150,9 @@ fun DidacticContentScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         DiagramNode("☀️ Solar", "Energía inicial", Color(0xFFEFF6FF), Color(0xFF1D4ED8))
-                        Text("➔", fontSize = 18.sp, color = Color(0xFF94A3B8))
+                        Text("➔", fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         DiagramNode("⚡ Eléctrica", "Transformación", Color(0xFFFEF3C7), Color(0xFFD97706))
-                        Text("➔", fontSize = 18.sp, color = Color(0xFF94A3B8))
+                        Text("➔", fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         DiagramNode("💡 Luz", "Resultado", Color(0xFFDCFCE7), Color(0xFF15803D))
                     }
 
@@ -199,9 +199,9 @@ fun DidacticContentScreen(
                         Icon(Icons.Default.PlayArrow, contentDescription = "Play", tint = Color.White, modifier = Modifier.size(18.dp))
                     }
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text("Escuchar explicación", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                    Text("Escuchar explicación", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(modifier = Modifier.weight(1f))
-                    Text("1:24", fontSize = 12.sp, color = Color(0xFF64748B))
+                    Text("1:24", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -234,7 +234,7 @@ fun DidacticContentScreen(
                     .fillMaxWidth()
                     .height(52.dp),
                 shape = RoundedCornerShape(26.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text("Ir a la actividad", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
@@ -255,6 +255,6 @@ fun DiagramNode(title: String, subtitle: String, bg: Color, textColor: Color) {
             Text(title, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = textColor)
         }
         Spacer(modifier = Modifier.height(4.dp))
-        Text(subtitle, fontSize = 10.sp, color = Color(0xFF64748B))
+        Text(subtitle, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

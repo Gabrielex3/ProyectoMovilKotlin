@@ -1,9 +1,9 @@
 package com.example.appcolegio.ui.screens.student
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,19 +19,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,45 +45,62 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.appcolegio.data.model.ContentItem
+import com.example.appcolegio.data.model.InteractiveItem
+import com.example.appcolegio.data.model.QuizItem
+import com.example.appcolegio.data.model.UnitItem
 import com.example.appcolegio.ui.AppScreen
 
 @Composable
 fun UnitDetailScreen(
+    units: List<UnitItem>,
+    bestScores: Map<String, Pair<Int, Int>>,
+    canTake: (String) -> Boolean,
+    onSelectQuiz: (String) -> Unit,
     onNavigate: (AppScreen) -> Unit
 ) {
+    var selectedUnitIndex by remember { mutableStateOf(0) }
+    val currentUnit = units.getOrNull(selectedUnitIndex) ?: units.firstOrNull()
+
     Scaffold(
         topBar = {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(horizontal = 8.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
-                IconButton(onClick = { onNavigate(AppScreen.STUDENT_HOME) }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Ciencias Naturales", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                    Text("Unidad 2 de 4", fontSize = 12.sp, color = Color(0xFF64748B))
-                }
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFFDBEAFE),
-                    modifier = Modifier.padding(end = 8.dp)
+                Spacer(modifier = Modifier.height(28.dp)) // Safe camera punch-hole padding
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Estudiante",
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                        color = Color(0xFF1E40AF),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    IconButton(onClick = { onNavigate(AppScreen.SUBJECTS_LIST) }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(currentUnit?.subjectName ?: "Asignatura", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                        Text("Unidades de Aprendizaje (3 Unidades)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFDBEAFE),
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Text(
+                            text = "Estudiante",
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            color = Color(0xFF1E40AF),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
         },
         bottomBar = {
-            NavigationBar(containerColor = Color.White) {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                 NavigationBarItem(
                     selected = false,
                     onClick = { onNavigate(AppScreen.STUDENT_HOME) },
@@ -87,13 +109,13 @@ fun UnitDetailScreen(
                 )
                 NavigationBarItem(
                     selected = true,
-                    onClick = { onNavigate(AppScreen.UNIT_DETAIL) },
-                    icon = { Icon(Icons.Default.Book, contentDescription = "Contenidos") },
-                    label = { Text("Contenidos") }
+                    onClick = { onNavigate(AppScreen.SUBJECTS_LIST) },
+                    icon = { Icon(Icons.Default.Book, contentDescription = "Asignaturas") },
+                    label = { Text("Asignaturas") }
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { onNavigate(AppScreen.QUIZ_ACTIVITY) },
+                    onClick = { onNavigate(AppScreen.STUDENT_ACTIVITIES) },
                     icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = "Actividades") },
                     label = { Text("Actividades") }
                 )
@@ -103,131 +125,167 @@ fun UnitDetailScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8FAFC))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Main Green Unit Banner
-            Card(
+            Text("Selecciona una Unidad:", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF059669))
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = Color(0xFF047857)
-                        ) {
-                            Text(
-                                text = "UNIDAD 2",
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                color = Color.White,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-
-                        Text("44% completado", color = Color(0xFFD1FAE5), fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text(
-                        text = "La energía y sus\ntransformaciones",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        lineHeight = 24.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "Explora cómo la energía cambia, se transfiere y está presente en tu vida cotidiana.",
-                        fontSize = 12.sp,
-                        color = Color(0xFFECFDF5),
-                        lineHeight = 16.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    LinearProgressIndicator(
-                        progress = { 0.44f },
+                units.forEachIndexed { index, unit ->
+                    val isSelected = selectedUnitIndex == index
+                    Surface(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(6.dp)
-                            .clip(RoundedCornerShape(3.dp)),
-                        color = Color(0xFF34D399),
-                        trackColor = Color(0xFF047857)
-                    )
+                            .weight(1f)
+                            .clickable { selectedUnitIndex = index },
+                        shape = RoundedCornerShape(10.dp),
+                        color = if (isSelected) Color(0xFF059669) else MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(1.dp, if (isSelected) Color(0xFF059669) else Color(0xFFCBD5E1))
+                    ) {
+                        Text(
+                            text = "Unidad ${unit.unitNumber}",
+                            modifier = Modifier.padding(vertical = 10.dp),
+                            color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Objetivos de Aprendizaje
-            Text("🎯 Objetivos de aprendizaje", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+            if (currentUnit != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF059669))
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = Color(0xFF047857)
+                            ) {
+                                Text(
+                                    text = "UNIDAD ${currentUnit.unitNumber}",
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    color = Color.White,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
 
-            Spacer(modifier = Modifier.height(12.dp))
+                            Text("${currentUnit.progressPercent}% completado", color = Color(0xFFD1FAE5), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
 
-            OaCard(
-                oaCode = "OA 8",
-                text = "Explicar que la energía es necesaria para que los objetos cambien y los seres vivos realicen procesos vitales."
-            )
+                        Spacer(modifier = Modifier.height(12.dp))
 
-            Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = currentUnit.unitTitle,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            lineHeight = 22.sp
+                        )
 
-            OaCard(
-                oaCode = "OA 9",
-                text = "Investigar transformaciones de energía en situaciones simples del entorno."
-            )
+                        Spacer(modifier = Modifier.height(8.dp))
 
-            Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = currentUnit.description,
+                            fontSize = 12.sp,
+                            color = Color(0xFFECFDF5),
+                            lineHeight = 16.sp
+                        )
 
-            // Ruta de aprendizaje
-            Text("Ruta de aprendizaje", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                        Spacer(modifier = Modifier.height(14.dp))
 
-            Spacer(modifier = Modifier.height(12.dp))
+                        LinearProgressIndicator(
+                            progress = { currentUnit.progressPercent / 100f },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(6.dp)
+                                .clip(RoundedCornerShape(3.dp)),
+                            color = Color(0xFF34D399),
+                            trackColor = Color(0xFF047857)
+                        )
+                    }
+                }
 
-            RouteItemCard(
-                numberStr = "1",
-                title = "¿Qué es la energía?",
-                subtitle = "Lectura y audio • 8 min",
-                badgeText = "Completado",
-                badgeColor = Color(0xFFD1FAE5),
-                textColor = Color(0xFF047857),
-                onClick = { onNavigate(AppScreen.DIDACTIC_CONTENT) }
-            )
+                Spacer(modifier = Modifier.height(20.dp))
 
-            Spacer(modifier = Modifier.height(10.dp))
+                Text("🎯 Objetivos de Aprendizaje (OAs)", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Spacer(modifier = Modifier.height(8.dp))
+                currentUnit.learningObjectives.forEach { oa ->
+                    OaCard(oaCode = oa.code, text = oa.description)
+                    Spacer(modifier = Modifier.height(6.dp))
+                }
 
-            RouteItemCard(
-                numberStr = "2",
-                title = "La energía se transforma",
-                subtitle = "Contenido interactivo • 10 min",
-                badgeText = "Continuar",
-                badgeColor = Color(0xFFDBEAFE),
-                textColor = Color(0xFF1D4ED8),
-                onClick = { onNavigate(AppScreen.DIDACTIC_CONTENT) }
-            )
+                Spacer(modifier = Modifier.height(20.dp))
 
-            Spacer(modifier = Modifier.height(10.dp))
+                Text("📖 1. Contenidos de Estudio", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Spacer(modifier = Modifier.height(8.dp))
+                if (currentUnit.contents.isEmpty()) {
+                    Text("No hay contenidos añadidos aún.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    currentUnit.contents.forEach { content ->
+                        ExpandableContentCard(content = content)
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
 
-            RouteItemCard(
-                numberStr = "3",
-                title = "Comprueba lo aprendido",
-                subtitle = "Actividad • 5 preguntas",
-                badgeText = "Pendiente",
-                badgeColor = Color(0xFFF1F5F9),
-                textColor = Color(0xFF64748B),
-                onClick = { onNavigate(AppScreen.QUIZ_ACTIVITY) }
-            )
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text("⚡ 2. Contenido Interactivo", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Spacer(modifier = Modifier.height(8.dp))
+                if (currentUnit.interactiveContents.isEmpty()) {
+                    Text("No hay recursos interactivos aún.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    currentUnit.interactiveContents.forEach { interactive ->
+                        InteractiveCard(item = interactive) {
+                            onNavigate(AppScreen.DIDACTIC_CONTENT)
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text("📝 3. Quizzes y Evaluaciones", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Spacer(modifier = Modifier.height(8.dp))
+                if (currentUnit.quizzes.isEmpty()) {
+                    Text("No hay quizzes disponibles para esta unidad.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    currentUnit.quizzes.forEach { quiz ->
+                        val isAvailable = canTake(quiz.id)
+                        val bestScore = bestScores[quiz.id]
+
+                        QuizItemCard(
+                            quiz = quiz,
+                            isAvailable = isAvailable,
+                            bestScore = bestScore,
+                            onClick = {
+                                onSelectQuiz(quiz.id)
+                                if (isAvailable) {
+                                    onNavigate(AppScreen.QUIZ_SESSION)
+                                } else {
+                                    onNavigate(AppScreen.QUIZ_RESULT)
+                                }
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+            }
         }
     }
 }
@@ -236,30 +294,30 @@ fun UnitDetailScreen(
 fun OaCard(oaCode: String, text: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.Top
         ) {
             Surface(
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(6.dp),
                 color = Color(0xFFD1FAE5)
             ) {
                 Text(
                     text = oaCode,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                     color = Color(0xFF047857),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = text,
                 fontSize = 12.sp,
-                color = Color(0xFF334155),
+                color = MaterialTheme.colorScheme.onSurface,
                 lineHeight = 16.sp
             )
         }
@@ -267,54 +325,124 @@ fun OaCard(oaCode: String, text: String) {
 }
 
 @Composable
-fun RouteItemCard(
-    numberStr: String,
-    title: String,
-    subtitle: String,
-    badgeText: String,
-    badgeColor: Color,
-    textColor: Color,
-    onClick: () -> Unit
-) {
+fun ExpandableContentCard(content: ContentItem) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(content.title, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text(if (expanded) "▲ Ocultar" else "▼ Leer", fontSize = 11.sp, color = Color(0xFF2563EB), fontWeight = FontWeight.Bold)
+            }
+            if (expanded) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(content.bodyText, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 18.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text("⏱️ Lectura estimada: ${content.durationMin} min", fontSize = 10.sp, color = Color(0xFF64748B))
+            }
+        }
+    }
+}
+
+@Composable
+fun InteractiveCard(item: InteractiveItem, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEFF6FF))
     ) {
         Row(
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFFF1F5F9)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(numberStr, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color(0xFF1E293B))
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
             Column(modifier = Modifier.weight(1f)) {
-                Text(title, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                Text(subtitle, fontSize = 11.sp, color = Color(0xFF64748B))
+                Text("⚡ ${item.title}", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1D4ED8))
+                Text(item.description, fontSize = 11.sp, color = Color(0xFF3B82F6))
+            }
+            Text("Abrir ➔", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1D4ED8))
+        }
+    }
+}
+
+@Composable
+fun QuizItemCard(
+    quiz: QuizItem,
+    isAvailable: Boolean,
+    bestScore: Pair<Int, Int>?,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = if (isAvailable) Color(0xFFFEF3C7) else Color(0xFFF3F4F6))
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("📝 ${quiz.title}", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = if (isAvailable) Color(0xFF92400E) else Color(0xFF4B5563))
+                    Text("${quiz.questions.size} preguntas de evaluación", fontSize = 11.sp, color = if (isAvailable) Color(0xFFB45309) else Color(0xFF6B7280))
+                }
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = if (isAvailable) Color(0xFFDCFCE7) else Color(0xFFFEE2E2)
+                ) {
+                    Text(
+                        text = if (isAvailable) "Disponible" else "Intentos agotados",
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isAvailable) Color(0xFF15803D) else Color(0xFFDC2626)
+                    )
+                }
             }
 
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = badgeColor
-            ) {
+            if (bestScore != null) {
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = badgeText,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                    color = textColor,
+                    text = "⭐ Nota obtenida: ${bestScore.first}/${bestScore.second} correctas",
                     fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFB45309)
                 )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Button(
+                    onClick = onClick,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isAvailable) Color(0xFFD97706) else Color(0xFF2563EB)
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.height(36.dp)
+                ) {
+                    Text(
+                        text = if (isAvailable) "Iniciar Quiz" else "Ver Retroalimentación ➔",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
             }
         }
     }
