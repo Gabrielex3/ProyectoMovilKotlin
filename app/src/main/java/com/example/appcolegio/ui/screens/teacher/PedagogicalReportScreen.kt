@@ -1,39 +1,16 @@
 package com.example.appcolegio.ui.screens.teacher
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Assignment
-import androidx.compose.material.icons.filled.Analytics
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -50,214 +27,157 @@ fun PedagogicalReportScreen(
     val isAutorizado = utpStatus == "AUTORIZADO"
     val isCambiosSolicitados = utpStatus == "CAMBIOS_SOLICITADOS"
 
+    val statusColor = when {
+        isAutorizado -> TeacherOk
+        isCambiosSolicitados -> TeacherDanger
+        else -> TeacherWarn
+    }
+    val titleText = when {
+        isAutorizado -> "Informe autorizado por UTP"
+        isCambiosSolicitados -> "Cambios solicitados por UTP"
+        else -> "Pendiente de validación UTP"
+    }
+    val subtitleText = when {
+        isAutorizado -> "Aprobado para visualización institucional."
+        isCambiosSolicitados -> "Revisa los comentarios de la Jefatura UTP y reenvía."
+        else -> "Borrador docente. No está visible para estudiantes."
+    }
+    val badgeText = when {
+        isAutorizado -> "VALIDADO"
+        isCambiosSolicitados -> "CAMBIOS"
+        else -> "BORRADOR"
+    }
+
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(horizontal = 8.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { onNavigate(AppScreen.TEACHER_HOME) }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Informe pedagógico", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                    Text("Ciencias • 6.° A", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFFCCFBF1),
-                    modifier = Modifier.padding(end = 8.dp)
-                ) {
-                    Text(
-                        text = "Docente",
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                        color = Color(0xFF0F766E),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
+            TeacherTopBar(
+                title = "Informe pedagógico",
+                subtitle = "Ciencias • 6.° A",
+                onBack = { onNavigate(AppScreen.TEACHER_HOME) },
+                trailing = { TeacherStatusPill("Docente", TeacherAccent) }
+            )
         },
-        bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { onNavigate(AppScreen.TEACHER_HOME) },
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Curso") },
-                    label = { Text("Curso") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { onNavigate(AppScreen.CONTENT_ASSIGNMENT) },
-                    icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = "Asignar") },
-                    label = { Text("Asignar") }
-                )
-                NavigationBarItem(
-                    selected = true,
-                    onClick = { onNavigate(AppScreen.PEDAGOGICAL_REPORT) },
-                    icon = { Icon(Icons.Default.Analytics, contentDescription = "Informes") },
-                    label = { Text("Informes") }
-                )
-            }
-        }
+        bottomBar = { TeacherBottomBar(selected = 2, onNavigate = onNavigate) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Dynamic Status Banner reflecting UTP decision!
-            val bannerBg = when {
-                isAutorizado -> Color(0xFFDCFCE7)
-                isCambiosSolicitados -> Color(0xFFFEE2E2)
-                else -> Color(0xFFFEF3C7)
-            }
-            val titleText = when {
-                isAutorizado -> "✅ Informe autorizado por UTP"
-                isCambiosSolicitados -> "⚠️ Cambios solicitados por UTP"
-                else -> "⏳ Pendiente de validación UTP"
-            }
-            val subtitleText = when {
-                isAutorizado -> "Aprobado para visualización institucional."
-                isCambiosSolicitados -> "Revisa los comentarios de la Jefatura UTP y reenvía."
-                else -> "Borrador docente. No está visible para estudiantes."
-            }
-            val badgeText = when {
-                isAutorizado -> "VALIDADO"
-                isCambiosSolicitados -> "CAMBIOS"
-                else -> "BORRADOR"
-            }
-            val badgeColor = when {
-                isAutorizado -> Color(0xFF15803D)
-                isCambiosSolicitados -> Color(0xFFB91C1C)
-                else -> Color(0xFFB45309)
-            }
-
+            // Estado UTP
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = bannerBg)
+                colors = CardDefaults.cardColors(containerColor = statusColor.copy(alpha = 0.10f)),
+                border = BorderStroke(1.dp, statusColor.copy(alpha = 0.40f)),
+                elevation = CardDefaults.cardElevation(0.dp)
             ) {
                 Row(
                     modifier = Modifier.padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = titleText,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = badgeColor
-                        )
-                        Text(
-                            text = subtitleText,
-                            fontSize = 11.sp,
-                            color = badgeColor
-                        )
+                    Column(Modifier.weight(1f)) {
+                        Text(titleText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = statusColor)
+                        Text(subtitleText, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = Color.White.copy(alpha = 0.8f)
-                    ) {
-                        Text(
-                            text = badgeText,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            color = badgeColor,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Spacer(Modifier.width(8.dp))
+                    TeacherStatusPill(badgeText, statusColor)
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
-            // Filters Row
+            // Filtros
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    border = BorderStroke(1.dp, Color(0xFFCBD5E1))
-                ) {
-                    Text("👥 6.° A  ▼", modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                FilterDropdownChip("6.° A")
+                FilterDropdownChip("Unidad 2")
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            // Síntesis del curso
+            TeacherCard(modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp)) {
+                    TeacherSectionHeader(
+                        title = "Síntesis del curso",
+                        trailing = {
+                            Text("34 estudiantes", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    )
+                    Spacer(Modifier.height(14.dp))
+                    TeacherDistributionBar(
+                        listOf(19 to TeacherOk, 10 to TeacherWarn, 5 to TeacherMuted)
+                    )
+                    Spacer(Modifier.height(14.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        SummaryBox("19", "Logrado", TeacherOk.copy(alpha = 0.12f), TeacherOk, Modifier.weight(1f))
+                        SummaryBox("10", "En proceso", TeacherWarn.copy(alpha = 0.12f), TeacherWarn, Modifier.weight(1f))
+                        SummaryBox("5", "Sin evidencia", TeacherMuted.copy(alpha = 0.12f), TeacherMuted, Modifier.weight(1f))
+                    }
                 }
+            }
 
-                Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    border = BorderStroke(1.dp, Color(0xFFCBD5E1))
-                ) {
-                    Text("📖 Unidad 2  ▼", modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(24.dp))
+
+            TeacherSectionHeader(
+                title = "Resultados por objetivo",
+                trailing = {
+                    Text("Ordenar por logro", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TeacherAccent)
                 }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Síntesis del Curso
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Síntesis del curso", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Text("34 estudiantes", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                SummaryBox("19", "Logrado", Color(0xFFDCFCE7), Color(0xFF15803D), Modifier.weight(1f))
-                SummaryBox("10", "En proceso", Color(0xFFFEF3C7), Color(0xFFB45309), Modifier.weight(1f))
-                SummaryBox("5", "Sin evidencia", Color(0xFFF1F5F9), Color(0xFF64748B), Modifier.weight(1f))
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Resultados por Objetivo
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Resultados por objetivo", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Text("Ordenar por logro", fontSize = 11.sp, color = Color(0xFF2563EB), fontWeight = FontWeight.Bold)
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
+            )
+            Spacer(Modifier.height(12.dp))
 
             objectives.forEach { oa ->
                 OaResultCard(oa)
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(Modifier.height(12.dp))
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(4.dp))
 
-            // Disclaimer Footnote
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                elevation = CardDefaults.cardElevation(0.dp)
             ) {
-                Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("ℹ️ ", fontSize = 14.sp)
-                    Text(
-                        text = "Resumen basado en actividades del MVP. Requiere criterio docente y validación UTP; no constituye diagnóstico automático.",
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 15.sp
-                    )
-                }
+                Text(
+                    text = "Resumen basado en actividades del MVP. Requiere criterio docente y validación UTP; no constituye diagnóstico automático.",
+                    modifier = Modifier.padding(12.dp),
+                    fontSize = 11.sp,
+                    lineHeight = 15.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
+
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+private fun FilterDropdownChip(text: String) {
+    Surface(
+        shape = RoundedCornerShape(10.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+            Icon(
+                Icons.Default.KeyboardArrowDown,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -267,63 +187,54 @@ fun SummaryBox(count: String, label: String, bg: Color, textColor: Color, modifi
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = bg)
+        colors = CardDefaults.cardColors(containerColor = bg),
+        elevation = CardDefaults.cardElevation(0.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(count, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = textColor)
-            Text(label, fontSize = 10.sp, color = textColor, fontWeight = FontWeight.Medium)
+        Column(Modifier.padding(12.dp)) {
+            Text(count, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = textColor)
+            Text(label, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = textColor)
         }
     }
 }
 
 @Composable
 fun OaResultCard(oa: LearningObjective) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+    val color = teacherProgressColor(oa.achievedPercent.toFloat())
+
+    TeacherCard(modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(shape = RoundedCornerShape(8.dp), color = Color(0xFFD1FAE5)) {
-                    Text(oa.code, modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp), fontSize = 11.sp, color = Color(0xFF047857), fontWeight = FontWeight.Bold)
-                }
-
-                Text("${oa.achievedPercent}%", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1D4ED8))
+                TeacherStatusPill(oa.code, TeacherInfo)
+                Text("${oa.achievedPercent}%", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = color)
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(Modifier.height(10.dp))
 
-            Text(oa.description, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            LinearProgressIndicator(
-                progress = { oa.achievedPercent / 100f },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                color = Color(0xFF2563EB),
-                trackColor = Color(0xFFE2E8F0)
+            Text(
+                oa.description,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+                lineHeight = 18.sp,
+                color = MaterialTheme.colorScheme.onSurface
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(12.dp))
+
+            TeacherProgressBar(progress = oa.achievedPercent / 100f, color = color)
+
+            Spacer(Modifier.height(12.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("🟢 ${oa.logradoCount} logrado", fontSize = 11.sp, color = Color(0xFF15803D))
-                Text("🟡 ${oa.enProcesoCount} en proceso", fontSize = 11.sp, color = Color(0xFFB45309))
-                Text("⚪ ${oa.sinEvidenciaCount} sin evidencia", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                TeacherLegendItem(TeacherOk, "${oa.logradoCount} logrado")
+                TeacherLegendItem(TeacherWarn, "${oa.enProcesoCount} en proceso")
+                TeacherLegendItem(TeacherMuted, "${oa.sinEvidenciaCount} sin evidencia")
             }
         }
     }

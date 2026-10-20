@@ -1,5 +1,19 @@
 package com.example.appcolegio
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.ui.graphics.Brush
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -405,243 +419,262 @@ fun AppNavigation(viewModel: MainViewModel) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+private fun roleLabel(role: String): String =
+    if (role.uppercase() == "UTP") "UTP" else role.lowercase().replaceFirstChar { it.uppercase() }
+
+// ---------- Login ----------
 @Composable
 fun LoginScreen(navController: NavController, viewModel: MainViewModel) {
     var targetRole by remember { mutableStateOf("ESTUDIANTE") }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
     val currentThemeMode by viewModel.themeMode.collectAsState()
     val context = LocalContext.current
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
-            .padding(20.dp),
-        contentAlignment = Alignment.Center
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .imePadding()
+            .padding(horizontal = 20.dp, vertical = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ----- Marca -----
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center
         ) {
-            // Floating Theme Switcher Pill Card at Top
-            Card(
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
+            Icon(
+                imageVector = Icons.Default.School,
+                contentDescription = "Escuela",
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(34.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "MPAZ PRO 6.º",
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+            text = "Escuela Escritora Marcela Paz",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        // ----- Formulario -----
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
+                    text = "Iniciar sesión",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "Selecciona tu perfil e ingresa tus credenciales",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = "Perfil",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+
                 Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text("Tema:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    ThemeSelectorChip("📱 Auto", currentThemeMode == ThemeMode.SYSTEM) {
-                        viewModel.setThemeMode(ThemeMode.SYSTEM)
+                    RoleSelectTab("Estudiante", targetRole == "ESTUDIANTE", modifier = Modifier.weight(1f)) {
+                        targetRole = "ESTUDIANTE"
                     }
-                    ThemeSelectorChip("☀️ Claro", currentThemeMode == ThemeMode.LIGHT) {
-                        viewModel.setThemeMode(ThemeMode.LIGHT)
+                    RoleSelectTab("Docente", targetRole == "DOCENTE", modifier = Modifier.weight(1f)) {
+                        targetRole = "DOCENTE"
                     }
-                    ThemeSelectorChip("🌙 Oscuro", currentThemeMode == ThemeMode.DARK) {
-                        viewModel.setThemeMode(ThemeMode.DARK)
+                    RoleSelectTab("UTP", targetRole == "UTP", modifier = Modifier.weight(1f)) {
+                        targetRole = "UTP"
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-            // Main Login Card Container
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(28.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // Header Logo Circle
-                    Box(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFDBEAFE)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.School,
-                            contentDescription = "Escuela",
-                            tint = Color(0xFF1D4ED8),
-                            modifier = Modifier.size(36.dp)
-                        )
-                    }
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Usuario") },
+                    placeholder = { Text("Ej: alumno1, profe1, utp1") },
+                    singleLine = true,
+                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Usuario") },
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = Color(0xFFEFF6FF)
-                    ) {
-                        Text(
-                            text = "MPAZ PRO 6.º",
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 5.dp),
-                            color = Color(0xFF1D4ED8),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text(
-                        text = "Escuela Escritora Marcela Paz",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Selecciona tu perfil e ingresa tus credenciales",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Role Selection Tabs
-                    Text(
-                        text = "¿Cómo deseas ingresar?",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        RoleSelectTab("Estudiante", targetRole == "ESTUDIANTE", modifier = Modifier.weight(1f)) {
-                            targetRole = "ESTUDIANTE"
-                        }
-                        RoleSelectTab("Docente", targetRole == "DOCENTE", modifier = Modifier.weight(1f)) {
-                            targetRole = "DOCENTE"
-                        }
-                        RoleSelectTab("UTP", targetRole == "UTP", modifier = Modifier.weight(1f)) {
-                            targetRole = "UTP"
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    OutlinedTextField(
-                        value = username,
-                        onValueChange = { username = it },
-                        label = { Text("Usuario") },
-                        placeholder = { Text("Ej: alumno1, profe1, utp1") },
-                        singleLine = true,
-                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Usuario") },
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = { Text("Contraseña") },
-                        placeholder = { Text("Ejemplo: 1234") },
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Contraseña") },
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(
-                        onClick = {
-                            if (username.isBlank() || password.isBlank()) {
-                                Toast.makeText(context, "Por favor ingresa tu usuario y contraseña", Toast.LENGTH_SHORT).show()
-                                return@Button
-                            }
-
-                            val roleFromDb = viewModel.login(username.trim(), password.trim())
-
-                            if (roleFromDb == null) {
-                                Toast.makeText(context, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
-                            } else {
-                                val roleDbUpper = roleFromDb.uppercase()
-                                val targetUpper = targetRole.uppercase()
-
-                                val isRoleMatching = when {
-                                    targetUpper == "ESTUDIANTE" && (roleDbUpper.contains("ESTUDIANTE") || roleDbUpper.contains("ALUMNO")) -> true
-                                    targetUpper == "DOCENTE" && (roleDbUpper.contains("DOCENTE") || roleDbUpper.contains("PROFE")) -> true
-                                    targetUpper == "UTP" && roleDbUpper.contains("UTP") -> true
-                                    else -> false
-                                }
-
-                                if (isRoleMatching) {
-                                    Toast.makeText(context, "Ingresando como $roleFromDb", Toast.LENGTH_SHORT).show()
-                                    when (targetUpper) {
-                                        "ESTUDIANTE" -> navController.navigate(AppScreen.STUDENT_HOME.name)
-                                        "DOCENTE" -> navController.navigate(AppScreen.TEACHER_HOME.name)
-                                        "UTP" -> navController.navigate(AppScreen.UTP_HOME.name)
-                                    }
-                                } else {
-                                    Toast.makeText(
-                                        context,
-                                        "⚠️ El perfil seleccionado ($targetRole) no coincide con el rol de la cuenta ($roleFromDb)",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp),
-                        shape = RoundedCornerShape(26.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                    ) {
-                        Text("Ingresar como $targetRole", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Contraseña") },
+                    placeholder = { Text("Ejemplo: 1234") },
+                    singleLine = true,
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Contraseña") },
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
-                                imageVector = Icons.Default.Shield,
-                                contentDescription = "Seguridad BD",
-                                tint = Color(0xFF10B981),
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Autenticación por base de datos SQLite segura.",
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
                             )
                         }
-                    }
+                    },
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = {
+                        if (username.isBlank() || password.isBlank()) {
+                            Toast.makeText(context, "Por favor ingresa tu usuario y contraseña", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+
+                        val roleFromDb = viewModel.login(username.trim(), password.trim())
+
+                        if (roleFromDb == null) {
+                            Toast.makeText(context, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
+                        } else {
+                            val roleDbUpper = roleFromDb.uppercase()
+                            val targetUpper = targetRole.uppercase()
+
+                            val isRoleMatching = when {
+                                targetUpper == "ESTUDIANTE" && (roleDbUpper.contains("ESTUDIANTE") || roleDbUpper.contains("ALUMNO")) -> true
+                                targetUpper == "DOCENTE" && (roleDbUpper.contains("DOCENTE") || roleDbUpper.contains("PROFE")) -> true
+                                targetUpper == "UTP" && roleDbUpper.contains("UTP") -> true
+                                else -> false
+                            }
+
+                            if (isRoleMatching) {
+                                Toast.makeText(context, "Ingresando como $roleFromDb", Toast.LENGTH_SHORT).show()
+                                when (targetUpper) {
+                                    "ESTUDIANTE" -> navController.navigate(AppScreen.STUDENT_HOME.name)
+                                    "DOCENTE" -> navController.navigate(AppScreen.TEACHER_HOME.name)
+                                    "UTP" -> navController.navigate(AppScreen.UTP_HOME.name)
+                                }
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "⚠️ El perfil seleccionado ($targetRole) no coincide con el rol de la cuenta ($roleFromDb)",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(
+                        text = "Ingresar como ${roleLabel(targetRole)}",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Shield,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Autenticación por base de datos SQLite segura.",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // ----- Tema -----
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = Color.Transparent,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "Tema",
+                    modifier = Modifier.padding(horizontal = 6.dp),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                ThemeSelectorChip("Auto", currentThemeMode == ThemeMode.SYSTEM) {
+                    viewModel.setThemeMode(ThemeMode.SYSTEM)
+                }
+                ThemeSelectorChip("Claro", currentThemeMode == ThemeMode.LIGHT) {
+                    viewModel.setThemeMode(ThemeMode.LIGHT)
+                }
+                ThemeSelectorChip("Oscuro", currentThemeMode == ThemeMode.DARK) {
+                    viewModel.setThemeMode(ThemeMode.DARK)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -651,20 +684,24 @@ fun ThemeSelectorChip(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val bg = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
-    val textColor = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+    val bg by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f) else Color.Transparent,
+        label = "themeChipBg"
+    )
 
     Surface(
-        modifier = Modifier.clickable { onClick() },
-        shape = RoundedCornerShape(18.dp),
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .clickable { onClick() },
+        shape = RoundedCornerShape(8.dp),
         color = bg
     ) {
         Text(
             text = label,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-            fontSize = 11.sp,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            color = textColor
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            fontSize = 12.sp,
+            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -676,23 +713,25 @@ fun RoleSelectTab(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val bg = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
-    val borderCol = if (isSelected) MaterialTheme.colorScheme.primary else Color(0xFFCBD5E1)
-    val textColor = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
+    val bg by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+        label = "roleTabBg"
+    )
 
-    Card(
-        modifier = modifier.clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(if (isSelected) 2.dp else 1.dp, borderCol),
-        colors = CardDefaults.cardColors(containerColor = bg)
+    Box(
+        modifier = modifier
+            .height(44.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(bg)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(roleTitle, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = textColor)
-        }
+        Text(
+            text = roleTitle,
+            fontSize = 14.sp,
+            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
     }
 }

@@ -1,40 +1,25 @@
 package com.example.appcolegio.ui.screens.student
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -54,105 +39,67 @@ fun QuizResultScreen(
 ) {
     val incorrectCount = maxOf(0, total - score)
     val percentage = if (total > 0) (score * 100) / total else 0
+    val stars = when {
+        percentage >= 80 -> 3
+        percentage >= 50 -> 2
+        percentage > 0 -> 1
+        else -> 0
+    }
+    val (emoji, headline) = when {
+        percentage >= 80 -> "🏆" to "¡Excelente trabajo!"
+        percentage >= 50 -> "🎉" to "¡Buen trabajo!"
+        else -> "💪" to "¡Sigue intentando!"
+    }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-            ) {
-                Spacer(modifier = Modifier.height(28.dp)) // Safe camera punch-hole padding
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { onNavigate(AppScreen.STUDENT_ACTIVITIES) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text("Resultado de la actividad", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                        Text("Evaluación • Desglose", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFFDBEAFE),
-                        modifier = Modifier.padding(end = 8.dp)
-                    ) {
-                        Text(
-                            text = "Estudiante",
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                            color = Color(0xFF1E40AF),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-            }
+            KidsTopBar(
+                title = "🎯 Resultado de la actividad",
+                subtitle = "Evaluación • Desglose",
+                onBack = { onNavigate(AppScreen.STUDENT_ACTIVITIES) }
+            )
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Score Circle Badge
+            // Trofeo
             Box(
                 modifier = Modifier
-                    .size(96.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFFEF3C7)),
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(28.dp))
+                    .background(Brush.verticalGradient(listOf(KidYellow, KidOrange)))
+                    .padding(24.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "$score/$total",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFD97706)
-                    )
-                    Text(
-                        text = "correctas",
-                        fontSize = 10.sp,
-                        color = Color(0xFFB45309)
-                    )
+                    Text(emoji, fontSize = 64.sp)
+                    Text("$score/$total", fontSize = 40.sp, fontWeight = FontWeight.ExtraBold, color = KidInk)
+                    Text("respuestas correctas", fontSize = 13.sp, color = KidInk)
+                    Spacer(Modifier.height(8.dp))
+                    Text("⭐".repeat(stars) + "☆".repeat(3 - stars), fontSize = 28.sp)
+                    Spacer(Modifier.height(8.dp))
+                    KidsChip("🎯 $percentage% de logro", Color.White, KidInk)
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = Color(0xFFFEF3C7)
-            ) {
-                Text(
-                    text = "🎯 $percentage% de logro",
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                    color = Color(0xFFB45309),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
             Text(
-                text = "¡Buen trabajo!",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                text = headline,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.ExtraBold,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(Modifier.height(4.dp))
 
             Text(
                 text = if (incorrectCount == 0) "¡Excelente! Has respondido todas las preguntas correctamente." else "Revisa las respuestas detalladas a continuación.",
@@ -162,50 +109,51 @@ fun QuizResultScreen(
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
-            // Attempts Card
+            // Intentos
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFEFF6FF))
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = KidBlue.copy(alpha = 0.12f)),
+                border = BorderStroke(2.dp, KidBlue),
+                elevation = CardDefaults.cardElevation(0.dp)
             ) {
                 Row(
-                    modifier = Modifier.padding(12.dp),
+                    modifier = Modifier.padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("🔄 ", fontSize = 14.sp)
+                    Text("🔄", fontSize = 26.sp)
+                    Spacer(Modifier.width(10.dp))
                     Column {
                         Text(
                             text = if (attemptsLeft > 0) "Te quedan $attemptsLeft intentos" else "Has agotado tus intentos",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1D4ED8)
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = KidBlue
                         )
                         Text(
                             text = "Se conserva tu mejor resultado.",
-                            fontSize = 11.sp,
-                            color = Color(0xFF3B82F6)
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(Modifier.height(24.dp))
 
-            // Answers Breakdown
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Tus respuestas", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Text("🟢 $score correctas  🔴 $incorrectCount incorrectas", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Column(modifier = Modifier.fillMaxWidth()) {
+                KidsSectionTitle("📋 Tus respuestas")
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    KidsChip("🟢 $score correctas", KidGreen, Color.White)
+                    KidsChip("🔴 $incorrectCount incorrectas", KidRed, Color.White)
+                }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(12.dp))
 
-            // Dynamic questions breakdown matching score
             questions.forEachIndexed { index, q ->
                 val userSelection = q.userSelectedIndex ?: 0
                 val isCorrect = userSelection == q.correctIndex
@@ -217,12 +165,11 @@ fun QuizResultScreen(
                     subtitle = correctOptionText,
                     isCorrect = isCorrect
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(Modifier.height(10.dp))
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(Modifier.height(20.dp))
 
-            // Bottom Buttons: Volver a Actividades / Reintentar (si quedan intentos)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -231,10 +178,11 @@ fun QuizResultScreen(
                     onClick = { onNavigate(AppScreen.STUDENT_ACTIVITIES) },
                     modifier = Modifier
                         .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(24.dp)
+                        .height(56.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    border = BorderStroke(2.dp, KidBlue)
                 ) {
-                    Text("Menú Actividades", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text("📝 Actividades", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface)
                 }
 
                 if (attemptsLeft > 0) {
@@ -242,14 +190,16 @@ fun QuizResultScreen(
                         onClick = { onRetry() },
                         modifier = Modifier
                             .weight(1f)
-                            .height(48.dp),
+                            .height(56.dp),
                         shape = RoundedCornerShape(24.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        colors = ButtonDefaults.buttonColors(containerColor = KidOrange)
                     ) {
-                        Text("Reintentar ($attemptsLeft)", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text("🔁 Reintentar ($attemptsLeft)", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
                     }
                 }
             }
+
+            Spacer(Modifier.height(16.dp))
         }
     }
 }
@@ -261,13 +211,14 @@ fun ResultAnswerItem(
     subtitle: String,
     isCorrect: Boolean
 ) {
-    val bgCircle = if (isCorrect) Color(0xFFDCFCE7) else Color(0xFFFEE2E2)
-    val iconTint = if (isCorrect) Color(0xFF16A34A) else Color(0xFFDC2626)
+    val accent = if (isCorrect) KidGreen else KidRed
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = accent.copy(alpha = 0.12f)),
+        border = BorderStroke(2.dp, accent),
+        elevation = CardDefaults.cardElevation(0.dp)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -275,35 +226,22 @@ fun ResultAnswerItem(
         ) {
             Box(
                 modifier = Modifier
-                    .size(28.dp)
+                    .size(34.dp)
                     .clip(CircleShape)
-                    .background(if (isCorrect) Color(0xFF16A34A) else Color(0xFFDC2626)),
+                    .background(accent),
                 contentAlignment = Alignment.Center
             ) {
-                Text("$number", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("$number", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(title, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Text(subtitle, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(title, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface)
+                Text("Respuesta correcta: $subtitle", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .background(bgCircle),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = if (isCorrect) Icons.Default.Check else Icons.Default.Close,
-                    contentDescription = if (isCorrect) "Correcto" else "Incorrecto",
-                    tint = iconTint,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+            Text(if (isCorrect) "✅" else "❌", fontSize = 26.sp)
         }
     }
 }
