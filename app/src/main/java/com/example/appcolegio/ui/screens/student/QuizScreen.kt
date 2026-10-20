@@ -2,25 +2,13 @@ package com.example.appcolegio.ui.screens.student
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -28,10 +16,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,6 +34,8 @@ import androidx.compose.ui.unit.sp
 import com.example.appcolegio.data.model.QuizQuestion
 import com.example.appcolegio.ui.AppScreen
 
+private val optionAccents = listOf(KidBlue, KidOrange, KidGreen, KidPurple)
+
 @Composable
 fun QuizScreen(
     questions: List<QuizQuestion>,
@@ -62,85 +50,82 @@ fun QuizScreen(
         mutableIntStateOf(currentQuestion.userSelectedIndex ?: 0)
     }
 
+    val style = kidSubjectStyle(currentQuestion.subjectName)
+    val isLast = currentIndex + 1 >= mutableQuestions.size
+
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+            KidsTopBar(
+                title = "${style.emoji} ${currentQuestion.subjectName}",
+                subtitle = "Evaluación de la unidad",
+                color = style.color,
+                onBack = { onNavigate(AppScreen.STUDENT_ACTIVITIES) },
+                trailing = {
                     IconButton(onClick = { onNavigate(AppScreen.STUDENT_ACTIVITIES) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = Color.White)
                     }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(currentQuestion.subjectName, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                        Text("Evaluación de la unidad", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                },
+                bottom = {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            "Pregunta ${currentIndex + 1} de ${mutableQuestions.size}",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color.White
+                        )
+                        Text("1 punto ⭐", fontSize = 13.sp, color = Color.White)
                     }
-                    IconButton(onClick = { onNavigate(AppScreen.STUDENT_ACTIVITIES) }) {
-                        Icon(Icons.Default.Close, contentDescription = "Cerrar")
-                    }
+                    KidsProgressBar(
+                        progress = (currentIndex + 1) / mutableQuestions.size.toFloat(),
+                        color = KidYellow,
+                        track = Color.White.copy(alpha = 0.25f),
+                        height = 12.dp,
+                        modifier = Modifier.padding(horizontal = 12.dp)
+                    )
                 }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Pregunta ${currentIndex + 1} de ${mutableQuestions.size}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                    Text("1 punto", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-
-                LinearProgressIndicator(
-                    progress = { (currentIndex + 1) / mutableQuestions.size.toFloat() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(4.dp),
-                    color = Color(0xFF2563EB),
-                    trackColor = Color(0xFFE2E8F0)
-                )
-            }
+            )
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            Text(
-                text = "OBSERVA Y RESPONDE (${currentQuestion.title})",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            KidsChip(
+                text = "🧠 OBSERVA Y RESPONDE · ${currentQuestion.title}",
+                bg = style.color.copy(alpha = 0.15f),
+                fg = style.color
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(Modifier.height(10.dp))
 
             Text(
                 text = currentQuestion.contextText,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                fontSize = 20.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onSurface,
+                lineHeight = 26.sp
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
-            // Visual Box
+            // Caja visual
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFFEF3C7))
+                    .height(140.dp),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = KidYellow.copy(alpha = 0.28f)),
+                border = BorderStroke(2.dp, KidYellow),
+                elevation = CardDefaults.cardElevation(0.dp)
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -157,50 +142,36 @@ fun QuizScreen(
                                 "math" -> "🔢"
                                 else -> "📖"
                             },
-                            fontSize = 44.sp
+                            fontSize = 56.sp
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = Color(0xFFFDE68A)
-                        ) {
-                            Text(
-                                text = currentQuestion.subjectName,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF92400E)
-                            )
-                        }
+                        Spacer(Modifier.height(4.dp))
+                        KidsChip(currentQuestion.subjectName, KidYellow, KidInk)
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(Modifier.height(20.dp))
 
-            // Options List
             currentQuestion.options.forEachIndexed { index, optionText ->
-                val isSelected = selectedOptionForCurrent == index
                 OptionItem(
                     text = optionText,
-                    isSelected = isSelected,
-                    onClick = { selectedOptionForCurrent = index }
+                    isSelected = selectedOptionForCurrent == index,
+                    onClick = { selectedOptionForCurrent = index },
+                    letter = ('A' + index).toString(),
+                    accent = optionAccents[index % optionAccents.size]
                 )
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(Modifier.height(12.dp))
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(4.dp))
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("ℹ️ ", fontSize = 12.sp)
-                Text(
-                    text = "Puedes cambiar tu respuesta antes de pasar a la siguiente.",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            Text(
+                text = "💡 Puedes cambiar tu respuesta antes de pasar a la siguiente.",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(Modifier.height(20.dp))
 
             Button(
                 onClick = {
@@ -221,17 +192,20 @@ fun QuizScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(26.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    .height(60.dp),
+                shape = RoundedCornerShape(24.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = KidOrange),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
             ) {
                 Text(
-                    text = if (currentIndex + 1 < mutableQuestions.size) "Siguiente Pregunta ➔" else "Finalizar y ver Resultado",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
+                    text = if (isLast) "¡Finalizar y ver resultado! 🏆" else "Siguiente pregunta ➔",
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.ExtraBold,
                     color = Color.White
                 )
             }
+
+            Spacer(Modifier.height(16.dp))
         }
     }
 }
@@ -240,48 +214,65 @@ fun QuizScreen(
 fun OptionItem(
     text: String,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    letter: String = "",
+    accent: Color = KidBlue
 ) {
-    val borderColor = if (isSelected) Color(0xFF2563EB) else Color(0xFFCBD5E1)
-    val cardBg = if (isSelected) Color(0xFFEFF6FF) else MaterialTheme.colorScheme.surface
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 60.dp)
+            .clip(RoundedCornerShape(20.dp))
             .clickable { onClick() },
-        shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(if (isSelected) 2.dp else 1.dp, borderColor),
-        colors = CardDefaults.cardColors(containerColor = cardBg)
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(if (isSelected) 3.dp else 2.dp, if (isSelected) accent else accent.copy(alpha = 0.35f)),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) accent.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(if (isSelected) 4.dp else 1.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            if (letter.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(if (isSelected) accent else accent.copy(alpha = 0.18f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        letter,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = if (isSelected) Color.White else accent
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+            }
+
             Text(
                 text = text,
                 modifier = Modifier.weight(1f),
-                fontSize = 13.sp,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                color = if (isSelected) Color(0xFF1E40AF) else MaterialTheme.colorScheme.onSurface
+                fontSize = 15.sp,
+                fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
 
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .background(if (isSelected) Color(0xFF2563EB) else Color.Transparent)
-                    .border(1.dp, if (isSelected) Color(0xFF2563EB) else Color(0xFFCBD5E1), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                if (isSelected) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Seleccionado",
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
+            if (isSelected) {
+                Spacer(Modifier.width(8.dp))
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .background(KidYellow),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("✓", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = KidInk)
                 }
             }
         }

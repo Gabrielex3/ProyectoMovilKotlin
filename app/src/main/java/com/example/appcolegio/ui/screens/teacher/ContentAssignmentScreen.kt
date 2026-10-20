@@ -2,38 +2,19 @@ package com.example.appcolegio.ui.screens.teacher
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -44,7 +25,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.appcolegio.data.model.AssignmentConfig
@@ -61,20 +44,47 @@ fun ContentAssignmentScreen(
     var isPublished by remember { mutableStateOf(currentConfig.isPublished) }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(horizontal = 8.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { onNavigate(AppScreen.TEACHER_HOME) }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Nueva asignación", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                    Text("Docente • Curso 6.° A", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            TeacherTopBar(
+                title = "Nueva asignación",
+                subtitle = "Docente • Curso 6.° A",
+                onBack = { onNavigate(AppScreen.TEACHER_HOME) },
+                trailing = { TeacherStatusPill("Borrador", TeacherWarn) }
+            )
+        },
+        bottomBar = {
+            TeacherActionBar {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedButton(
+                        onClick = { onNavigate(AppScreen.CREATE_QUIZ) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, TeacherAccent)
+                    ) {
+                        Text("Crear quiz", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TeacherAccent)
+                    }
+                    Button(
+                        onClick = {
+                            onSaveConfig(
+                                AssignmentConfig(
+                                    maxAttempts = maxAttempts,
+                                    showCorrection = showCorrection,
+                                    isPublished = isPublished
+                                )
+                            )
+                            onNavigate(AppScreen.PEDAGOGICAL_REPORT)
+                        },
+                        modifier = Modifier
+                            .weight(1.4f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = TeacherAccent)
+                    ) {
+                        Text("Revisar asignación", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                    }
                 }
             }
         }
@@ -82,286 +92,301 @@ fun ContentAssignmentScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Wizard Steps Header
+            // Pasos
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 StepIndicator("1", "Contenido", isDone = true, isActive = false)
-                Text("───", color = Color(0xFFCBD5E1), fontSize = 12.sp)
+                StepConnector(done = true, modifier = Modifier.weight(1f))
                 StepIndicator("2", "Configurar", isDone = false, isActive = true)
-                Text("───", color = Color(0xFFCBD5E1), fontSize = 12.sp)
+                StepConnector(done = false, modifier = Modifier.weight(1f))
                 StepIndicator("3", "Confirmar", isDone = false, isActive = false)
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(Modifier.height(20.dp))
 
-            // Selected Content Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFEFF6FF))
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+            // Contenido seleccionado
+            TeacherCard(modifier = Modifier.fillMaxWidth(), selected = true) {
+                Column(Modifier.padding(16.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Surface(shape = RoundedCornerShape(8.dp), color = Color(0xFFDBEAFE)) {
-                            Text("CIENCIAS - OA 9", modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp), fontSize = 11.sp, color = Color(0xFF1D4ED8), fontWeight = FontWeight.Bold)
-                        }
-                        Text("Cambiar", fontSize = 12.sp, color = Color(0xFF2563EB), fontWeight = FontWeight.Bold, modifier = Modifier.clickable { })
-                    }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text("La energía se transforma", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text("Contenido + actividad de 5 preguntas • 15 min", fontSize = 12.sp, color = Color(0xFF64748B))
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text("Configura la actividad", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Field 1: Course
-            Text("Curso destinatario", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(modifier = Modifier.height(4.dp))
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(14.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("👥 6.° A • 34 estudiantes", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                    Text("▼", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Field 2: Due Date
-            Text("Fecha de entrega", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(modifier = Modifier.height(4.dp))
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(14.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("📅 Viernes 9 de octubre - 18:00", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                    Text("▼", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Field 3: Attempt Limits
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Límite de intentos", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .clickable { if (maxAttempts > 1) maxAttempts-- },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Default.Remove, contentDescription = "Restar", modifier = Modifier.size(16.dp))
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Text(maxAttempts.toString(), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFDBEAFE))
-                            .clickable { maxAttempts++ },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = "Sumar", tint = Color(0xFF1D4ED8), modifier = Modifier.size(16.dp))
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                AttemptOptionChip("1 intento", maxAttempts == 1) { maxAttempts = 1 }
-                AttemptOptionChip("2 intentos", maxAttempts == 2) { maxAttempts = 2 }
-                AttemptOptionChip("3 intentos", maxAttempts == 3) { maxAttempts = 3 }
-                AttemptOptionChip("Sin límite", maxAttempts > 10) { maxAttempts = 99 }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Field 4: Show correction toggle
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Mostrar corrección al finalizar", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                    Text("Indica respuestas correctas e incorrectas", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Switch(
-                    checked = showCorrection,
-                    onCheckedChange = { showCorrection = it },
-                    colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF2563EB))
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Field 5: Publish now toggle
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Publicar ahora", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                    Text("Disponible inmediatamente para el curso", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Switch(
-                    checked = isPublished,
-                    onCheckedChange = { isPublished = it },
-                    colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF2563EB))
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Info Notice
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFBEB))
-            ) {
-                Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("ℹ️ ", fontSize = 14.sp)
-                    Text(
-                        text = "Se guardará como borrador hasta confirmar la asignación.",
-                        fontSize = 11.sp,
-                        color = Color(0xFF92400E)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            Button(
-                onClick = { onNavigate(AppScreen.CREATE_QUIZ) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(24.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D9488))
-            ) {
-                Text("➕ Crear Nuevo Quiz / Pregunta", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = {
-                    onSaveConfig(
-                        AssignmentConfig(
-                            maxAttempts = maxAttempts,
-                            showCorrection = showCorrection,
-                            isPublished = isPublished
+                        TeacherStatusPill("CIENCIAS · OA 9", TeacherAccent)
+                        Text(
+                            "Cambiar",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = TeacherAccent,
+                            modifier = Modifier.clickable { }
                         )
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        "La energía se transforma",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                    onNavigate(AppScreen.PEDAGOGICAL_REPORT)
-                },
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        "Contenido + actividad de 5 preguntas • 15 min",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            TeacherSectionHeader("Configuración de la actividad")
+            Spacer(Modifier.height(14.dp))
+
+            SelectField("Curso destinatario", "6.° A • 34 estudiantes")
+            Spacer(Modifier.height(14.dp))
+            SelectField("Fecha de entrega", "Viernes 9 de octubre · 18:00")
+
+            Spacer(Modifier.height(20.dp))
+
+            // Intentos
+            TeacherCard(modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                "Límite de intentos",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                "Veces que cada estudiante puede rendir",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        StepperButton(Icons.Default.Remove, "Restar") { if (maxAttempts > 1) maxAttempts-- }
+                        Text(
+                            text = if (maxAttempts > 10) "∞" else maxAttempts.toString(),
+                            modifier = Modifier.width(36.dp),
+                            textAlign = TextAlign.Center,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        StepperButton(Icons.Default.Add, "Sumar") { maxAttempts++ }
+                    }
+
+                    Spacer(Modifier.height(14.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        AttemptOptionChip("1", maxAttempts == 1, Modifier.weight(1f)) { maxAttempts = 1 }
+                        AttemptOptionChip("2", maxAttempts == 2, Modifier.weight(1f)) { maxAttempts = 2 }
+                        AttemptOptionChip("3", maxAttempts == 3, Modifier.weight(1f)) { maxAttempts = 3 }
+                        AttemptOptionChip("Sin límite", maxAttempts > 10, Modifier.weight(1.6f)) { maxAttempts = 99 }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(14.dp))
+
+            // Opciones
+            TeacherCard(modifier = Modifier.fillMaxWidth()) {
+                ToggleRow(
+                    title = "Mostrar corrección al finalizar",
+                    description = "Indica respuestas correctas e incorrectas",
+                    checked = showCorrection,
+                    onChange = { showCorrection = it }
+                )
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(MaterialTheme.colorScheme.outlineVariant)
+                )
+                ToggleRow(
+                    title = "Publicar ahora",
+                    description = "Disponible inmediatamente para el curso",
+                    checked = isPublished,
+                    onChange = { isPublished = it }
+                )
+            }
+
+            Spacer(Modifier.height(14.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = TeacherWarn.copy(alpha = 0.10f)),
+                elevation = CardDefaults.cardElevation(0.dp)
+            ) {
+                Text(
+                    text = "Se guardará como borrador hasta confirmar la asignación.",
+                    modifier = Modifier.padding(12.dp),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+private fun SelectField(label: String, value: String) {
+    Column(Modifier.fillMaxWidth()) {
+        Text(label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(4.dp))
+        TeacherCard(modifier = Modifier.fillMaxWidth()) {
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(26.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    .padding(horizontal = 14.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Revisar asignación", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(
+                    value,
+                    modifier = Modifier.weight(1f),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Icon(
+                    Icons.Default.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
+}
+
+@Composable
+private fun StepperButton(icon: ImageVector, description: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(34.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(icon, contentDescription = description, modifier = Modifier.size(18.dp))
+    }
+}
+
+@Composable
+private fun ToggleRow(
+    title: String,
+    description: String,
+    checked: Boolean,
+    onChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+            Text(description, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onChange,
+            colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = TeacherAccent)
+        )
+    }
+}
+
+@Composable
+private fun StepConnector(done: Boolean, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .padding(horizontal = 8.dp)
+            .height(2.dp)
+            .background(if (done) TeacherOk else MaterialTheme.colorScheme.outlineVariant)
+    )
 }
 
 @Composable
 fun StepIndicator(step: String, label: String, isDone: Boolean, isActive: Boolean) {
     val circleBg = when {
-        isDone -> Color(0xFFDCFCE7)
-        isActive -> Color(0xFF2563EB)
-        else -> MaterialTheme.colorScheme.surfaceVariant
+        isDone -> TeacherOk
+        isActive -> TeacherAccent
+        else -> Color.Transparent
     }
-    val circleTextColor = when {
-        isDone -> Color(0xFF15803D)
-        isActive -> Color.White
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
-    }
+    val borderCol = if (isDone || isActive) Color.Transparent else MaterialTheme.colorScheme.outline
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
-                .size(24.dp)
+                .size(26.dp)
                 .clip(CircleShape)
-                .background(circleBg),
+                .background(circleBg)
+                .border(1.dp, borderCol, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Text(if (isDone) "✓" else step, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = circleTextColor)
+            if (isDone) {
+                Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
+            } else {
+                Text(
+                    step,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isActive) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(label, fontSize = 11.sp, fontWeight = if (isActive || isDone) FontWeight.Bold else FontWeight.Normal, color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.width(6.dp))
+        Text(
+            label,
+            fontSize = 12.sp,
+            fontWeight = if (isActive || isDone) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (isActive || isDone) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
 @Composable
-fun AttemptOptionChip(label: String, isSelected: Boolean, onClick: () -> Unit) {
-    val bg = if (isSelected) Color(0xFFDBEAFE) else MaterialTheme.colorScheme.surface
-    val textCol = if (isSelected) Color(0xFF1D4ED8) else MaterialTheme.colorScheme.onSurface
-
+fun AttemptOptionChip(
+    label: String,
+    isSelected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     Surface(
-        modifier = Modifier.clickable { onClick() },
-        shape = RoundedCornerShape(8.dp),
-        color = bg,
-        border = BorderStroke(1.dp, if (isSelected) Color(0xFF2563EB) else Color(0xFFCBD5E1))
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .clickable { onClick() },
+        shape = RoundedCornerShape(10.dp),
+        color = if (isSelected) TeacherAccent.copy(alpha = 0.12f) else Color.Transparent,
+        border = BorderStroke(
+            if (isSelected) 1.5.dp else 1.dp,
+            if (isSelected) TeacherAccent else MaterialTheme.colorScheme.outline
+        )
     ) {
-        Text(label, modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp), fontSize = 10.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal, color = textCol)
+        Text(
+            text = label,
+            modifier = Modifier.padding(vertical = 9.dp),
+            textAlign = TextAlign.Center,
+            fontSize = 13.sp,
+            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (isSelected) TeacherAccent else MaterialTheme.colorScheme.onSurface
+        )
     }
 }

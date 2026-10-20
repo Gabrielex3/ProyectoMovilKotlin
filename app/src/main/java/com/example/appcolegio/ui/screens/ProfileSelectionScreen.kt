@@ -1,9 +1,9 @@
 package com.example.appcolegio.ui.screens
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,22 +11,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -44,6 +42,30 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.appcolegio.data.model.UserProfile
 
+// ---------- Paleta ----------
+private val BgSoft = Color(0xFFF4F9FF)
+private val BlueMain = Color(0xFF2F80ED)
+private val BlueDark = Color(0xFF1B5FC1)
+private val OrangeWarm = Color(0xFFFF8A3D)
+private val GreenFresh = Color(0xFF27AE60)
+private val YellowStar = Color(0xFFFFC93C)
+private val PurpleUtp = Color(0xFF8E5CF7)
+private val TextDark = Color(0xFF1F2A44)
+private val TextSoft = Color(0xFF5B6B8C)
+
+private data class RoleStyle(
+    val emoji: String,
+    val color: Color,
+    val tagline: String
+)
+
+private fun roleStyle(role: String): RoleStyle = when (role) {
+    "Estudiante" -> RoleStyle("🧑‍🚀", OrangeWarm, "¡Juega y aprende!")
+    "Docente" -> RoleStyle("🍎", GreenFresh, "Prepara tus clases")
+    else -> RoleStyle("🧭", PurpleUtp, "Organiza las unidades")
+}
+
+// ---------- Pantalla ----------
 @Composable
 fun ProfileSelectionScreen(
     profiles: List<UserProfile>,
@@ -53,173 +75,185 @@ fun ProfileSelectionScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color(0xFFF8FAFC)
+        color = BgSoft
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp),
+                .navigationBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Logo Icon / Badge
+            // ----- Cabecera -----
             Box(
                 modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFE0E7FF)),
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(bottomStart = 36.dp, bottomEnd = 36.dp))
+                    .background(Brush.verticalGradient(listOf(BlueMain, BlueDark)))
+                    .statusBarsPadding()
+                    .padding(horizontal = 24.dp, vertical = 28.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF2563EB))
-                )
-            }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
+                        modifier = Modifier
+                            .size(84.dp)
+                            .clip(CircleShape)
+                            .background(YellowStar),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("🚀", fontSize = 44.sp)
+                    }
 
-            Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(Modifier.height(14.dp))
 
-            // Title Badge
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = Color(0xFFEFF6FF)
-            ) {
-                Text(
-                    text = "MPAZ PRO 6.º",
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                    color = Color(0xFF1D4ED8),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = Color.White.copy(alpha = 0.2f)
+                    ) {
+                        Text(
+                            text = "MPAZ PRO 6.º",
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    }
 
-            Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(Modifier.height(10.dp))
 
-            Text(
-                text = "Aprender juntos,\npaso a paso",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E293B),
-                textAlign = TextAlign.Center,
-                lineHeight = 30.sp
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = "Escuela Escritora Marcela Paz",
-                fontSize = 14.sp,
-                color = Color(0xFF64748B)
-            )
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "¿Con qué perfil quieres entrar?",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1E293B)
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "Perfiles ficticios para recorrer el prototipo académico.",
-                    fontSize = 13.sp,
-                    color = Color(0xFF64748B)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                profiles.forEach { profile ->
-                    val isSelected = selectedProfile.id == profile.id
-                    ProfileCard(
-                        profile = profile,
-                        isSelected = isSelected,
-                        onClick = { selectedProfile = profile }
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Info note
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F5F9))
-            ) {
-                Row(
-                    modifier = Modifier.padding(14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Shield,
-                        contentDescription = "Seguridad",
-                        tint = Color(0xFF10B981),
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Acceso demostrativo. No solicita cámara, GPS, micrófono ni biometría.",
-                        fontSize = 12.sp,
-                        color = Color(0xFF64748B),
-                        lineHeight = 16.sp
+                        text = "¡Aprendamos juntos,\npaso a paso!",
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 32.sp
+                    )
+
+                    Spacer(Modifier.height(4.dp))
+
+                    Text(
+                        text = "Escuela Escritora Marcela Paz",
+                        fontSize = 14.sp,
+                        color = Color.White.copy(alpha = 0.9f)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = { onProfileSelected(selectedProfile) },
+            // ----- Contenido -----
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(26.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+                    .padding(horizontal = 20.dp, vertical = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "👋 ¿Quién eres hoy?",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = TextDark
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "Elige un perfil para recorrer el prototipo.",
+                        fontSize = 13.sp,
+                        color = TextSoft
+                    )
+                    Spacer(Modifier.height(16.dp))
+
+                    profiles.forEach { profile ->
+                        ProfileCard(
+                            profile = profile,
+                            isSelected = selectedProfile.id == profile.id,
+                            onClick = { selectedProfile = profile }
+                        )
+                        Spacer(Modifier.height(14.dp))
+                    }
+                }
+
+                Spacer(Modifier.height(4.dp))
+
+                // Nota de privacidad
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F7EE))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("🛡️", fontSize = 24.sp)
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = "Acceso demostrativo. No solicita cámara, GPS, micrófono ni biometría.",
+                            fontSize = 12.sp,
+                            color = Color(0xFF1E6B3E),
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(24.dp))
+
+                Button(
+                    onClick = { onProfileSelected(selectedProfile) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = OrangeWarm),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
+                ) {
+                    Text(
+                        text = "¡Entrar como ${selectedProfile.name.split(" ").first()}! 🚀",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White
+                    )
+                }
+
+                Spacer(Modifier.height(12.dp))
+
                 Text(
-                    text = "Continuar como ${selectedProfile.name.split(" ").first()}",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    text = "Datos y personas exclusivamente ficticios.",
+                    fontSize = 11.sp,
+                    color = TextSoft
                 )
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "Datos y personas exclusivamente ficticios.",
-                fontSize = 11.sp,
-                color = Color(0xFF94A3B8)
-            )
         }
     }
 }
 
+// ---------- Tarjeta de perfil ----------
 @Composable
 fun ProfileCard(
     profile: UserProfile,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val borderColor = if (isSelected) Color(0xFF2563EB) else Color(0xFFE2E8F0)
-    val borderWidth = if (isSelected) 2.dp else 1.dp
-    val cardBg = if (isSelected) Color(0xFFEFF6FF) else Color.White
+    val style = roleStyle(profile.role)
+
+    val borderColor by animateColorAsState(
+        targetValue = if (isSelected) style.color else Color(0xFFDCE6F5),
+        label = "borderColor"
+    )
+    val cardBg by animateColorAsState(
+        targetValue = if (isSelected) style.color.copy(alpha = 0.12f) else Color.White,
+        label = "cardBg"
+    )
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
             .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(borderWidth, borderColor),
-        colors = CardDefaults.cardColors(containerColor = cardBg)
+        shape = RoundedCornerShape(24.dp),
+        border = BorderStroke(if (isSelected) 3.dp else 1.5.dp, borderColor),
+        colors = CardDefaults.cardColors(containerColor = cardBg),
+        elevation = CardDefaults.cardElevation(if (isSelected) 6.dp else 2.dp)
     ) {
         Row(
             modifier = Modifier
@@ -229,60 +263,54 @@ fun ProfileCard(
         ) {
             Box(
                 modifier = Modifier
-                    .size(44.dp)
+                    .size(60.dp)
                     .clip(CircleShape)
-                    .background(
-                        when (profile.role) {
-                            "Estudiante" -> Color(0xFF1D4ED8)
-                            "Docente" -> Color(0xFF0D9488)
-                            else -> Color(0xFF7C3AED)
-                        }
-                    ),
+                    .background(style.color.copy(alpha = 0.18f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = profile.avatarLetter,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
+                Text(style.emoji, fontSize = 32.sp)
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(Modifier.width(14.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = profile.name,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1E293B)
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = TextDark
                 )
                 Text(
                     text = profile.courseInfo,
                     fontSize = 12.sp,
-                    color = Color(0xFF64748B)
+                    color = TextSoft
                 )
+                Spacer(Modifier.height(6.dp))
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = style.color
+                ) {
+                    Text(
+                        text = "${profile.role} · ${style.tagline}",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
 
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = when (profile.role) {
-                    "Estudiante" -> Color(0xFFDBEAFE)
-                    "Docente" -> Color(0xFFCCFBF1)
-                    else -> Color(0xFFF3E8FF)
+            if (isSelected) {
+                Spacer(Modifier.width(8.dp))
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(YellowStar),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("✓", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = TextDark)
                 }
-            ) {
-                Text(
-                    text = profile.role,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                    color = when (profile.role) {
-                        "Estudiante" -> Color(0xFF1E40AF)
-                        "Docente" -> Color(0xFF0F766E)
-                        else -> Color(0xFF6B21A8)
-                    },
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
             }
         }
     }

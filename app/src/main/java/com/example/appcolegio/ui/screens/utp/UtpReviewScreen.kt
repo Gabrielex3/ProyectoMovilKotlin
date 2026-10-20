@@ -2,40 +2,16 @@ package com.example.appcolegio.ui.screens.utp
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Verified
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +22,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.appcolegio.data.model.UtpCriterion
 import com.example.appcolegio.ui.AppScreen
+import com.example.appcolegio.ui.screens.teacher.TeacherActionBar
+import com.example.appcolegio.ui.screens.teacher.TeacherCard
+import com.example.appcolegio.ui.screens.teacher.TeacherDanger
+import com.example.appcolegio.ui.screens.teacher.TeacherMuted
+import com.example.appcolegio.ui.screens.teacher.TeacherOk
+import com.example.appcolegio.ui.screens.teacher.TeacherProgressBar
+import com.example.appcolegio.ui.screens.teacher.TeacherSectionHeader
+import com.example.appcolegio.ui.screens.teacher.TeacherStatusPill
+import com.example.appcolegio.ui.screens.teacher.TeacherTopBar
+import com.example.appcolegio.ui.screens.teacher.TeacherWarn
 
 @Composable
 fun UtpReviewScreen(
@@ -57,145 +43,197 @@ fun UtpReviewScreen(
 ) {
     val isAutorizado = utpStatus == "AUTORIZADO"
     val isCambiosSolicitados = utpStatus == "CAMBIOS_SOLICITADOS"
+    val isPending = !isAutorizado && !isCambiosSolicitados
+
+    val total = criteriaList.size
+    val conformCount = if (isAutorizado) total else criteriaList.count { it.status == "Conforme" }
+
+    val statusColor = when {
+        isAutorizado -> TeacherOk
+        isCambiosSolicitados -> TeacherDanger
+        else -> TeacherWarn
+    }
+    val statusTitle = when {
+        isAutorizado -> "Unidad autorizada"
+        isCambiosSolicitados -> "Cambios solicitados"
+        else -> "Pendiente de autorización"
+    }
+    val statusSubtitle = when {
+        isAutorizado -> "Autorizada correctamente para el curso 6.° A."
+        isCambiosSolicitados -> "Cambios solicitados enviados al docente."
+        else -> "Revisa los criterios y toma una decisión."
+    }
+    val statusBadge = when {
+        isAutorizado -> "AUTORIZADA"
+        isCambiosSolicitados -> "CAMBIOS"
+        else -> "PENDIENTE"
+    }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-            ) {
-                Spacer(modifier = Modifier.height(28.dp)) // Safe camera punch-hole padding
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { onNavigate(AppScreen.UTP_HOME) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = when {
-                                isAutorizado -> "Autorizado"
-                                isCambiosSolicitados -> "Cambios solicitados"
-                                else -> "Pendiente de autorización"
-                            },
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text("Enviado por Camila Rojas • hoy, 10:24", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFFF3E8FF),
-                        modifier = Modifier.clickable { onNavigate(AppScreen.PROFILE_SELECTION) }
-                    ) {
-                        Text(
-                            text = "Jefatura UTP 🔄",
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            color = Color(0xFF6B21A8),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-            }
+            TeacherTopBar(
+                title = "Revisión de unidad",
+                subtitle = "Enviado por Camila Rojas • hoy, 10:24",
+                onBack = { onNavigate(AppScreen.UTP_HOME) },
+                trailing = { UtpSwitchProfileButton { onNavigate(AppScreen.PROFILE_SELECTION) } }
+            )
         },
         bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { onNavigate(AppScreen.UTP_HOME) },
-                    icon = { Icon(Icons.Default.Verified, contentDescription = "Solicitudes") },
-                    label = { Text("Solicitudes") }
-                )
-                NavigationBarItem(
-                    selected = true,
-                    onClick = { onNavigate(AppScreen.UTP_REVIEW) },
-                    icon = { Icon(Icons.Default.History, contentDescription = "Revisión") },
-                    label = { Text("Revisión") }
-                )
+            Column {
+                if (isPending) {
+                    TeacherActionBar(applyNavigationInsets = false) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            OutlinedButton(
+                                onClick = { onRequestChanges() },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                            ) {
+                                Text(
+                                    "Pedir cambios",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                            Button(
+                                onClick = { onAuthorize() },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = UtpAccent)
+                            ) {
+                                Text("Autorizar", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                            }
+                        }
+                    }
+                }
+                UtpBottomBar(selected = 1, onNavigate = onNavigate)
             }
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Content Summary Card
+            // Estado de la solicitud
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF0FDF4)),
-                border = BorderStroke(1.dp, Color(0xFFBBF7D0))
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = statusColor.copy(alpha = 0.10f)),
+                border = BorderStroke(1.dp, statusColor.copy(alpha = 0.40f)),
+                elevation = CardDefaults.cardElevation(0.dp)
             ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(statusTitle, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = statusColor)
+                        Text(statusSubtitle, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    TeacherStatusPill(statusBadge, statusColor)
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // Resumen del contenido
+            TeacherCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Surface(shape = RoundedCornerShape(8.dp), color = Color(0xFFDCFCE7)) {
-                            Text("CIENCIAS - UNIDAD 2", modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp), fontSize = 11.sp, color = Color(0xFF15803D), fontWeight = FontWeight.Bold)
-                        }
-
-                        Text("Versión 1.2", fontSize = 11.sp, color = Color(0xFF166534), fontWeight = FontWeight.Bold)
+                        TeacherStatusPill("CIENCIAS · UNIDAD 2", UtpAccent)
+                        Text(
+                            "Versión 1.2",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = TeacherMuted
+                        )
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(Modifier.height(10.dp))
 
-                    Text("La energía se transforma", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                    Text("Secuencia didáctica con explicación, apoyo visual, audio y actividad.", fontSize = 12.sp, color = Color(0xFF475569))
+                    Text(
+                        "La energía se transforma",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        "Secuencia didáctica con explicación, apoyo visual, audio y actividad.",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(Modifier.height(12.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         TagChip("OA 9")
-                        TagChip("⏱️ 15 min")
-                        TagChip("👥 6.° A")
-                        TagChip("🔄 3 intentos")
+                        TagChip("15 min")
+                        TagChip("6.° A")
+                        TagChip("3 intentos")
                     }
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(Modifier.height(14.dp))
 
                     OutlinedButton(
                         onClick = { onNavigate(AppScreen.DIDACTIC_CONTENT) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(10.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(44.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, UtpAccent)
                     ) {
-                        Text("👁️ Abrir vista previa del contenido", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1D4ED8))
+                        Icon(
+                            Icons.Default.Visibility,
+                            contentDescription = null,
+                            tint = UtpAccent,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Abrir vista previa del contenido",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = UtpAccent
+                        )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(Modifier.height(24.dp))
 
-            // Criterios de Revisión
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Criterios de revisión", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Text(
-                    text = if (isAutorizado) "4 de 4 conformes" else "3 de 4 conformes",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            // Criterios
+            TeacherSectionHeader(
+                title = "Criterios de revisión",
+                trailing = {
+                    Text(
+                        "$conformCount de $total conformes",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            )
+
+            if (total > 0) {
+                Spacer(Modifier.height(10.dp))
+                TeacherProgressBar(progress = conformCount / total.toFloat(), color = TeacherOk)
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(12.dp))
 
             criteriaList.forEach { criterion ->
                 CriterionCard(
@@ -203,66 +241,10 @@ fun UtpReviewScreen(
                     subtitle = criterion.subtitle,
                     status = if (isAutorizado) "Conforme" else criterion.status
                 )
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(Modifier.height(10.dp))
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
-
-            // Action Buttons for UTP Decision
-            if (!isAutorizado && !isCambiosSolicitados) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    OutlinedButton(
-                        onClick = { onRequestChanges() },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp),
-                        shape = RoundedCornerShape(24.dp)
-                    ) {
-                        Text("Pedir cambios", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                    }
-
-                    Button(
-                        onClick = { onAuthorize() },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp),
-                        shape = RoundedCornerShape(24.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                    ) {
-                        Text("Autorizar", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                    }
-                }
-            } else {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (isAutorizado) Color(0xFFDCFCE7) else Color(0xFFFEE2E2)
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = if (isAutorizado) Icons.Default.Check else Icons.Default.Verified,
-                            contentDescription = utpStatus,
-                            tint = if (isAutorizado) Color(0xFF15803D) else Color(0xFFB91C1C)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = if (isAutorizado) "✅ Unidad autorizada correctamente para el curso 6.° A" else "⚠️ Cambios solicitados enviada al docente",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isAutorizado) Color(0xFF15803D) else Color(0xFFB91C1C)
-                        )
-                    }
-                }
-            }
+            Spacer(Modifier.height(8.dp))
         }
     }
 }
@@ -271,44 +253,53 @@ fun UtpReviewScreen(
 fun TagChip(text: String) {
     Surface(
         shape = RoundedCornerShape(6.dp),
-        color = Color(0xFFDCFCE7)
+        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
-        Text(text, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp), fontSize = 10.sp, color = Color(0xFF15803D), fontWeight = FontWeight.SemiBold)
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
 @Composable
 fun CriterionCard(title: String, subtitle: String, status: String) {
     val isConforme = status == "Conforme"
-    val badgeBg = if (isConforme) Color(0xFFDCFCE7) else Color(0xFFFEF3C7)
-    val textColor = if (isConforme) Color(0xFF15803D) else Color(0xFFB45309)
+    val color = if (isConforme) TeacherOk else TeacherWarn
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
+    TeacherCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(title, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Text(subtitle, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-
-            Surface(
-                shape = RoundedCornerShape(10.dp),
-                color = badgeBg
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(color.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = status,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                    color = textColor,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
+                Icon(
+                    imageVector = if (isConforme) Icons.Default.Check else Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier.size(18.dp)
                 )
             }
+
+            Spacer(Modifier.width(12.dp))
+
+            Column(Modifier.weight(1f)) {
+                Text(title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                Text(subtitle, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+
+            Spacer(Modifier.width(8.dp))
+
+            TeacherStatusPill(status, color)
         }
     }
 }

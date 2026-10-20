@@ -3,33 +3,15 @@ package com.example.appcolegio.ui.screens.student
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Assignment
-import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.appcolegio.data.model.ContentItem
@@ -61,110 +44,65 @@ fun UnitDetailScreen(
 ) {
     var selectedUnitIndex by remember { mutableStateOf(0) }
     val currentUnit = units.getOrNull(selectedUnitIndex) ?: units.firstOrNull()
+    val style = kidSubjectStyle(currentUnit?.subjectName ?: "")
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-            ) {
-                Spacer(modifier = Modifier.height(28.dp)) // Safe camera punch-hole padding
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { onNavigate(AppScreen.SUBJECTS_LIST) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(currentUnit?.subjectName ?: "Asignatura", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                        Text("Unidades de Aprendizaje (3 Unidades)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFFDBEAFE),
-                        modifier = Modifier.padding(end = 8.dp)
-                    ) {
-                        Text(
-                            text = "Estudiante",
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                            color = Color(0xFF1E40AF),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-            }
+            KidsTopBar(
+                title = "${style.emoji} ${currentUnit?.subjectName ?: "Asignatura"}",
+                subtitle = "Unidades de Aprendizaje (${units.size} unidades)",
+                color = style.color,
+                onBack = { onNavigate(AppScreen.SUBJECTS_LIST) }
+            )
         },
-        bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { onNavigate(AppScreen.STUDENT_HOME) },
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
-                    label = { Text("Inicio") }
-                )
-                NavigationBarItem(
-                    selected = true,
-                    onClick = { onNavigate(AppScreen.SUBJECTS_LIST) },
-                    icon = { Icon(Icons.Default.Book, contentDescription = "Asignaturas") },
-                    label = { Text("Asignaturas") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { onNavigate(AppScreen.STUDENT_ACTIVITIES) },
-                    icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = "Actividades") },
-                    label = { Text("Actividades") }
-                )
-            }
-        }
+        bottomBar = { StudentBottomBar(selected = 1, onNavigate = onNavigate) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            Text("Selecciona una Unidad:", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-            Spacer(modifier = Modifier.height(8.dp))
+            KidsSectionTitle("🗺️ Elige tu nivel")
+            Spacer(Modifier.height(10.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 units.forEachIndexed { index, unit ->
                     val isSelected = selectedUnitIndex == index
                     Surface(
                         modifier = Modifier
                             .weight(1f)
+                            .clip(RoundedCornerShape(18.dp))
                             .clickable { selectedUnitIndex = index },
-                        shape = RoundedCornerShape(10.dp),
-                        color = if (isSelected) Color(0xFF059669) else MaterialTheme.colorScheme.surface,
-                        border = BorderStroke(1.dp, if (isSelected) Color(0xFF059669) else Color(0xFFCBD5E1))
+                        shape = RoundedCornerShape(18.dp),
+                        color = if (isSelected) style.color else MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(2.dp, style.color)
                     ) {
                         Text(
                             text = "Unidad ${unit.unitNumber}",
-                            modifier = Modifier.padding(vertical = 10.dp),
+                            modifier = Modifier.padding(vertical = 14.dp),
                             color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
             if (currentUnit != null) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF059669))
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = style.color),
+                    elevation = CardDefaults.cardElevation(6.dp)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Row(
@@ -172,98 +110,84 @@ fun UnitDetailScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = Color(0xFF047857)
-                            ) {
-                                Text(
-                                    text = "UNIDAD ${currentUnit.unitNumber}",
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    color = Color.White,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-
-                            Text("${currentUnit.progressPercent}% completado", color = Color(0xFFD1FAE5), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            KidsChip("UNIDAD ${currentUnit.unitNumber}", KidYellow, KidInk)
+                            Text(
+                                "${currentUnit.progressPercent}% completado",
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.ExtraBold
+                            )
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(Modifier.height(12.dp))
 
                         Text(
                             text = currentUnit.unitTitle,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.ExtraBold,
                             color = Color.White,
-                            lineHeight = 22.sp
+                            lineHeight = 24.sp
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(Modifier.height(8.dp))
 
                         Text(
                             text = currentUnit.description,
-                            fontSize = 12.sp,
-                            color = Color(0xFFECFDF5),
-                            lineHeight = 16.sp
+                            fontSize = 13.sp,
+                            color = Color.White.copy(alpha = 0.95f),
+                            lineHeight = 18.sp
                         )
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(Modifier.height(14.dp))
 
-                        LinearProgressIndicator(
-                            progress = { currentUnit.progressPercent / 100f },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(6.dp)
-                                .clip(RoundedCornerShape(3.dp)),
-                            color = Color(0xFF34D399),
-                            trackColor = Color(0xFF047857)
+                        KidsProgressBar(
+                            progress = currentUnit.progressPercent / 100f,
+                            color = KidYellow,
+                            track = Color.Black.copy(alpha = 0.2f),
+                            height = 12.dp
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text("🎯 Objetivos de Aprendizaje (OAs)", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(Modifier.height(24.dp))
+                KidsSectionTitle("🎯 Objetivos de Aprendizaje (OAs)")
+                Spacer(Modifier.height(10.dp))
                 currentUnit.learningObjectives.forEach { oa ->
                     OaCard(oaCode = oa.code, text = oa.description)
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(Modifier.height(8.dp))
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text("📖 1. Contenidos de Estudio", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(Modifier.height(16.dp))
+                KidsSectionTitle("📖 1. Contenidos de Estudio")
+                Spacer(Modifier.height(10.dp))
                 if (currentUnit.contents.isEmpty()) {
-                    Text("No hay contenidos añadidos aún.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("No hay contenidos añadidos aún.", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
                     currentUnit.contents.forEach { content ->
                         ExpandableContentCard(content = content)
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(Modifier.height(10.dp))
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text("⚡ 2. Contenido Interactivo", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(Modifier.height(16.dp))
+                KidsSectionTitle("⚡ 2. Contenido Interactivo")
+                Spacer(Modifier.height(10.dp))
                 if (currentUnit.interactiveContents.isEmpty()) {
-                    Text("No hay recursos interactivos aún.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("No hay recursos interactivos aún.", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
                     currentUnit.interactiveContents.forEach { interactive ->
                         InteractiveCard(item = interactive) {
                             onNavigate(AppScreen.DIDACTIC_CONTENT)
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(Modifier.height(10.dp))
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text("📝 3. Quizzes y Evaluaciones", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(Modifier.height(16.dp))
+                KidsSectionTitle("📝 3. Quizzes y Evaluaciones")
+                Spacer(Modifier.height(10.dp))
                 if (currentUnit.quizzes.isEmpty()) {
-                    Text("No hay quizzes disponibles para esta unidad.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("No hay quizzes disponibles para esta unidad.", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
                     currentUnit.quizzes.forEach { quiz ->
                         val isAvailable = canTake(quiz.id)
@@ -282,9 +206,11 @@ fun UnitDetailScreen(
                                 }
                             }
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(Modifier.height(10.dp))
                     }
                 }
+
+                Spacer(Modifier.height(16.dp))
             }
         }
     }
@@ -294,31 +220,22 @@ fun UnitDetailScreen(
 fun OaCard(oaCode: String, text: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.5.dp, KidGreen.copy(alpha = 0.4f)),
+        elevation = CardDefaults.cardElevation(1.dp)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.Top
         ) {
-            Surface(
-                shape = RoundedCornerShape(6.dp),
-                color = Color(0xFFD1FAE5)
-            ) {
-                Text(
-                    text = oaCode,
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                    color = Color(0xFF047857),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
+            KidsChip(oaCode, KidGreen, Color.White)
+            Spacer(Modifier.width(10.dp))
             Text(
                 text = text,
-                fontSize = 12.sp,
+                fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurface,
-                lineHeight = 16.sp
+                lineHeight = 18.sp
             )
         }
     }
@@ -331,24 +248,34 @@ fun ExpandableContentCard(content: ContentItem) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
             .clickable { expanded = !expanded },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(2.dp, KidBlue.copy(alpha = 0.5f)),
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(content.title, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Text(if (expanded) "▲ Ocultar" else "▼ Leer", fontSize = 11.sp, color = Color(0xFF2563EB), fontWeight = FontWeight.Bold)
+                Text("📖", fontSize = 26.sp)
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    content.title,
+                    modifier = Modifier.weight(1f),
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                KidsChip(if (expanded) "▲ Ocultar" else "▼ Leer", KidBlue, Color.White)
             }
             if (expanded) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(content.bodyText, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 18.sp)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text("⏱️ Lectura estimada: ${content.durationMin} min", fontSize = 10.sp, color = Color(0xFF64748B))
+                Spacer(Modifier.height(10.dp))
+                Text(content.bodyText, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface, lineHeight = 20.sp)
+                Spacer(Modifier.height(6.dp))
+                Text("⏱️ Lectura estimada: ${content.durationMin} min", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -359,19 +286,24 @@ fun InteractiveCard(item: InteractiveItem, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
             .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFEFF6FF))
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = KidBlue.copy(alpha = 0.12f)),
+        border = BorderStroke(2.dp, KidBlue),
+        elevation = CardDefaults.cardElevation(0.dp)
     ) {
         Row(
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Text("⚡", fontSize = 30.sp)
+            Spacer(Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text("⚡ ${item.title}", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1D4ED8))
-                Text(item.description, fontSize = 11.sp, color = Color(0xFF3B82F6))
+                Text(item.title, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = KidBlue)
+                Text(item.description, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text("Abrir ➔", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1D4ED8))
+            KidsChip("Abrir ➔", KidBlue, Color.White)
         }
     }
 }
@@ -383,66 +315,56 @@ fun QuizItemCard(
     bestScore: Pair<Int, Int>?,
     onClick: () -> Unit
 ) {
+    val accent = if (isAvailable) KidOrange else Color(0xFF94A3B8)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = if (isAvailable) Color(0xFFFEF3C7) else Color(0xFFF3F4F6))
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isAvailable) KidYellow.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant
+        ),
+        border = BorderStroke(2.dp, accent),
+        elevation = CardDefaults.cardElevation(0.dp)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Text("📝", fontSize = 28.sp)
+                Spacer(Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("📝 ${quiz.title}", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = if (isAvailable) Color(0xFF92400E) else Color(0xFF4B5563))
-                    Text("${quiz.questions.size} preguntas de evaluación", fontSize = 11.sp, color = if (isAvailable) Color(0xFFB45309) else Color(0xFF6B7280))
+                    Text(quiz.title, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface)
+                    Text("${quiz.questions.size} preguntas de evaluación", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = if (isAvailable) Color(0xFFDCFCE7) else Color(0xFFFEE2E2)
-                ) {
-                    Text(
-                        text = if (isAvailable) "Disponible" else "Intentos agotados",
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isAvailable) Color(0xFF15803D) else Color(0xFFDC2626)
-                    )
-                }
-            }
-
-            if (bestScore != null) {
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "⭐ Nota obtenida: ${bestScore.first}/${bestScore.second} correctas",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFB45309)
+                KidsChip(
+                    text = if (isAvailable) "Disponible" else "Sin intentos",
+                    bg = if (isAvailable) KidGreen else KidRed,
+                    fg = Color.White
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            if (bestScore != null) {
+                Spacer(Modifier.height(8.dp))
+                KidsChip("⭐ Mejor nota: ${bestScore.first}/${bestScore.second} correctas", KidYellow, KidInk)
+            }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+            Spacer(Modifier.height(12.dp))
+
+            Button(
+                onClick = onClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = if (isAvailable) KidOrange else KidBlue),
+                shape = RoundedCornerShape(24.dp)
             ) {
-                Button(
-                    onClick = onClick,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isAvailable) Color(0xFFD97706) else Color(0xFF2563EB)
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.height(36.dp)
-                ) {
-                    Text(
-                        text = if (isAvailable) "Iniciar Quiz" else "Ver Retroalimentación ➔",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
+                Text(
+                    text = if (isAvailable) "¡Iniciar Quiz! 🚀" else "Ver Retroalimentación ➔",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White
+                )
             }
         }
     }
